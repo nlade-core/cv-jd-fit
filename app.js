@@ -38,24 +38,54 @@ Kubernetes, or machine learning.`;
 const SYSTEM_PROMPT = `You evaluate how well a candidate's CV fits a job description.
 You will be given a CV and a job description. Assess the fit honestly and
 specifically, based only on what is actually stated in the CV — do not assume
-skills or experience that aren't written there. Respond ONLY with JSON matching
-the required schema. "score" is 0-100, where 100 means an excellent match.
-"matchedSkills" lists concrete skills/requirements from the job description
-that the CV does support. "gaps" lists concrete requirements from the job
-description that the CV does not show evidence of. "summary" is one or two
-plain sentences giving the overall verdict.`;
+skills or experience that aren't written there. The job description text may
+contain unrelated site navigation, boilerplate, or clutter; extract and
+evaluate only the substantive job requirements. Respond ONLY with JSON
+matching the required schema.
+
+For "matchedSkills": concrete skills/requirements from the job description
+that the CV does support. For "gaps": concrete requirements from the job
+description that the CV does not show evidence of. For each item in both
+lists, set "importance" to "required" if the job description states it as a
+minimum/required qualification, or "preferred" if it's stated as
+preferred/nice-to-have/a bonus — base this on the job description's own
+wording, not your own judgment of how important it seems. "summary" is one or
+two plain sentences giving the overall verdict. Do not invent a numeric score
+— none is requested.`;
+
+const SKILL_ITEM_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    skill: { type: "string" },
+    importance: { type: "string", enum: ["required", "preferred"] }
+  },
+  required: ["skill", "importance"]
+};
 
 const RESPONSE_SCHEMA = {
   type: "object",
   additionalProperties: false,
   properties: {
-    score: { type: "integer", minimum: 0, maximum: 100 },
-    matchedSkills: { type: "array", items: { type: "string" } },
-    gaps: { type: "array", items: { type: "string" } },
+    matchedSkills: { type: "array", items: SKILL_ITEM_SCHEMA },
+    gaps: { type: "array", items: SKILL_ITEM_SCHEMA },
     summary: { type: "string" }
   },
-  required: ["score", "matchedSkills", "gaps", "summary"]
+  required: ["matchedSkills", "gaps", "summary"]
 };
+
+// The score is arithmetic over the model's own matched/gap lists, not a
+// separate number the model has to invent -- required items count double so
+// a single missing must-have drags the score down more than a missing nice-
+// to-have, but the number is always traceable back to the visible lists.
+function computeScore(matchedSkills, gaps) {
+  const weight = (item) => (item.importance === 'required' ? 2 : 1);
+  const matchedWeight = matchedSkills.reduce((sum, item) => sum + weight(item), 0);
+  const gapWeight = gaps.reduce((sum, item) => sum + weight(item), 0);
+  const total = matchedWeight + gapWeight;
+  if (total === 0) return null; // no signal either way -- nothing to compute from
+  return Math.round((100 * matchedWeight) / total);
+}
 
 const statusPill = document.getElementById('status-pill');
 const cvTextEl = document.getElementById('cv-text');
@@ -107,22 +137,28 @@ async function checkCapability() {
 }
 checkCapability();
 
+function renderSkillList(listEl, items) {
+  listEl.innerHTML = '';
+  items.forEach((item) => {
+    const li = document.createElement('li');
+    li.textContent = item.skill;
+    const tag = document.createElement('span');
+    tag.className = 'importance-tag ' + item.importance;
+    tag.textContent = item.importance;
+    li.appendChild(tag);
+    listEl.appendChild(li);
+  });
+}
+
 function renderResult(data) {
   resultPanel.hidden = false;
-  scoreValue.textContent = String(data.score);
+  const matched = data.matchedSkills || [];
+  const gaps = data.gaps || [];
+  const score = computeScore(matched, gaps);
+  scoreValue.textContent = score === null ? '—' : String(score);
   summaryEl.textContent = data.summary;
-  matchedList.innerHTML = '';
-  (data.matchedSkills || []).forEach((s) => {
-    const li = document.createElement('li');
-    li.textContent = s;
-    matchedList.appendChild(li);
-  });
-  gapsList.innerHTML = '';
-  (data.gaps || []).forEach((s) => {
-    const li = document.createElement('li');
-    li.textContent = s;
-    gapsList.appendChild(li);
-  });
+  renderSkillList(matchedList, matched);
+  renderSkillList(gapsList, gaps);
 }
 
 function extractJson(text) {
