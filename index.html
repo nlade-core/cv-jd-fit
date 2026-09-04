@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cv-jd-fit</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>cv-jd-fit</h1>
+    <p class="tagline">Paste a job description. See how a CV stacks up — entirely in your browser.</p>
+    <span id="status-pill" class="status-pill">checking model…</span>
+  </header>
+
+  <main>
+    <section class="panel" id="cv-panel">
+      <h2>CV <span class="hint">(fixed sample for this MVP)</span></h2>
+      <pre id="cv-text"></pre>
+    </section>
+
+    <section class="panel" id="jd-panel">
+      <h2>Job description</h2>
+      <textarea id="jd-input" placeholder="Paste a job description here…" rows="14"></textarea>
+      <button id="run-btn" disabled>Check fit</button>
+      <p id="note" class="note"></p>
+    </section>
+
+    <section class="panel" id="result-panel" hidden>
+      <h2>Result</h2>
+      <div class="score-row">
+        <div class="score" id="score-value">–</div>
+        <div class="score-label">/ 100</div>
+      </div>
+      <p id="summary"></p>
+      <div class="cols">
+        <div>
+          <h3>Matched</h3>
+          <ul id="matched-list"></ul>
+        </div>
+        <div>
+          <h3>Gaps</h3>
+          <ul id="gaps-list"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Runs entirely on your device via Chrome's built-in AI. The CV and job description text never leave this page — no server, no network request, nothing to verify but your own devtools Network tab.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
