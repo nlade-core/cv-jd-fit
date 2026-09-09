@@ -92,15 +92,7 @@ main {
 .panel h2 { font-size: 1rem; margin-bottom: 0.75rem; }
 .panel h2 .hint { font-weight: 400; color: var(--muted); font-size: 0.8rem; }
 
-#cv-text {
-  white-space: pre-wrap;
-  font-family: inherit;
-  font-size: 0.85rem;
-  color: var(--text);
-  max-height: 22rem;
-  overflow-y: auto;
-}
-
+#cv-text,
 #jd-input {
   width: 100%;
   resize: vertical;
@@ -108,9 +100,14 @@ main {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.75rem;
+  font-family: inherit;
+  font-size: 0.85rem;
   color: var(--text);
-  margin-bottom: 0.75rem;
 }
+
+#cv-text { max-height: 22rem; }
+
+#jd-input { margin-bottom: 0.75rem; }
 
 #run-btn {
   background: var(--accent);

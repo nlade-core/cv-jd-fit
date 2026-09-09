@@ -1,4 +1,27 @@
-const CV_TEXT = `Alex Morgan
+// GH Pages serves every nlade-core project from the same origin
+// (nlade-core.github.io), so localStorage is shared across all of them --
+// unprefixed keys here can collide with another repo's. Always namespace.
+const STORAGE_PREFIX = 'cvjdfit.';
+const CV_STORAGE_KEY = STORAGE_PREFIX + 'cv';
+const JD_STORAGE_KEY = STORAGE_PREFIX + 'jd';
+
+function readStorage(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null; // storage disabled/unavailable (private mode, etc.) -- fall through to defaults
+  }
+}
+
+function writeStorage(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // storage disabled/full -- nothing to do, the field still works for this session
+  }
+}
+
+const SAMPLE_CV_TEXT = `Alex Morgan
 Software Engineer
 
 SUMMARY
@@ -98,7 +121,11 @@ const summaryEl = document.getElementById('summary');
 const matchedList = document.getElementById('matched-list');
 const gapsList = document.getElementById('gaps-list');
 
-cvTextEl.textContent = CV_TEXT;
+cvTextEl.value = readStorage(CV_STORAGE_KEY) ?? SAMPLE_CV_TEXT;
+jdInput.value = readStorage(JD_STORAGE_KEY) ?? '';
+
+cvTextEl.addEventListener('input', () => writeStorage(CV_STORAGE_KEY, cvTextEl.value));
+jdInput.addEventListener('input', () => writeStorage(JD_STORAGE_KEY, jdInput.value));
 
 let modelAvailability = null;
 let prewarmedSession = null; // only ever set when availability was already 'available' at load time
@@ -173,6 +200,10 @@ function extractJson(text) {
 
 async function runMatch() {
   const jdText = jdInput.value.trim();
+  if (!cvTextEl.value.trim()) {
+    note.textContent = 'Paste a CV first.';
+    return;
+  }
   if (!jdText) {
     note.textContent = 'Paste a job description first.';
     return;
@@ -202,7 +233,7 @@ async function runMatch() {
 
     note.textContent = 'Checking fit…';
     const raw = await session.prompt(
-      `CV:\n${CV_TEXT}\n\nJob description:\n${jdText}`,
+      `CV:\n${cvTextEl.value}\n\nJob description:\n${jdText}`,
       { responseConstraint: RESPONSE_SCHEMA }
     );
     const data = extractJson(raw);
