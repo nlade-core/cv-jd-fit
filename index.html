@@ -15,8 +15,13 @@
 
   <main>
     <section class="panel" id="cv-panel">
-      <h2>CV <span class="hint">(saved to this browser only)</span></h2>
-      <textarea id="cv-text" rows="14"></textarea>
+      <h2>CV <span class="hint">(pasted text is saved to this browser only)</span></h2>
+      <div class="cv-source">
+        <label class="file-btn"><input type="file" id="cv-file" accept="application/pdf,.pdf">Upload PDF</label>
+        <button type="button" id="cv-file-clear" class="link-btn" hidden>Use pasted text instead</button>
+        <span id="cv-file-status" class="cv-file-status" aria-live="polite">or paste the text below</span>
+      </div>
+      <textarea id="cv-text" rows="14" aria-label="CV text"></textarea>
     </section>
 
     <section class="panel" id="jd-panel">
@@ -27,6 +32,8 @@
     </section>
 
     <section class="panel" id="result-panel" hidden>
+      <div class="result-layout">
+      <div class="result-main">
       <h2>Result</h2>
       <div class="score-row">
         <div class="score" id="score-value">–</div>
@@ -37,6 +44,7 @@
       <div class="cols">
         <div>
           <h3>Matched</h3>
+          <p class="list-hint">Select an item to see the CV lines behind it.</p>
           <ul id="matched-list"></ul>
         </div>
         <div>
@@ -44,13 +52,21 @@
           <ul id="gaps-list"></ul>
         </div>
       </div>
+      </div>
+      <div class="evidence">
+        <h3>Evidence in the CV</h3>
+        <div id="evidence-view" class="evidence-view"></div>
+      </div>
+      </div>
     </section>
   </main>
 
   <footer>
-    <p>Runs entirely on your device via Chrome's built-in AI. The CV and job description text never leave this page — no server, no network request, nothing to verify but your own devtools Network tab.</p>
+    <p>Runs entirely on your device via Chrome's built-in AI. The CV (pasted or PDF) and job description never leave this page — no server, no network request, nothing to verify but your own devtools Network tab.</p>
   </footer>
 
-  <script src="app.js"></script>
+  <div id="hl-tip" class="hl-tip" role="tooltip" hidden></div>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>

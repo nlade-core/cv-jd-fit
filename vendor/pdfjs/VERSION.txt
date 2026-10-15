@@ -1,0 +1,2 @@
+pdfjs-dist 6.3.289 (Apache-2.0, see LICENSE), from npm.
+Files: build/pdf.min.mjs, build/pdf.worker.min.mjs, standard_fonts/ (Foxit + Liberation fonts, licences inside).

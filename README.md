@@ -15,14 +15,24 @@ First validation step for an on-device CV↔JD matching tool: before building re
 - Paste-a-JD, get matched skills + gaps (each tagged `required`/`preferred`, from the job description's own wording) + a one-line summary
 - The score is **computed, not model-generated** — a plain weighted formula over the matched/gap lists (required items count double), so the number is always traceable back to the visible lists rather than a separate, unverifiable LLM guess
 - Model availability check with a visible status pill (not a silent failure if unsupported)
+- CV as a PDF upload (paste still works), with evidence highlighting — see below
 
 **Explicitly not built yet** — cut so this MVP could ship fast and test the real unknown:
-- Real CV upload / PDF extraction
 - Recruiter vs. candidate persona split
 - Many-to-one batching (many CVs, or many JDs)
 - OCR fallback (only needed for the deck↔thesis sibling idea — CVs and JDs test clean as plain text)
 - Any "review/edit extracted text" flow
 - History/export of past matches (currently only the single latest CV + JD persist)
+
+## PDF upload and evidence highlighting
+
+- The CV can be uploaded as a PDF. It is read in the page with [pdf.js](https://github.com/mozilla/pdf.js) **6.3.289** (`pdfjs-dist`, Apache-2.0), vendored in `vendor/pdfjs/` with its `LICENSE` and the standard fonts (Foxit/Liberation licences included). No CDN.
+- `segment.js` splits the CV into numbered segments in code: text items are grouped into lines by position (two-column layouts are detected and read column by column), wrapped lines are merged into one segment, and packed skills lines are split into sub-segments (`14.1`, `14.2`, …). Pasted text gets the same treatment by bullets, blank lines and list splitting.
+- The model sees `[12] text…` lines and returns, for each matched item, the IDs of the lines that support it (structured output via `responseConstraint`, with a plain-JSON fallback). Unknown IDs are discarded; any quoted text you see is copied from the segments by code.
+- The result shows the original PDF pages with translucent highlights: every evidence line is tinted, selecting a matched item highlights its lines and scrolls to the first, hovering a highlight lists the criteria it supports. Gaps have no highlight.
+- **Limits:** scanned PDFs (no text layer) and PDFs with broken text encoding can't be read; Word files aren't supported. Tables that fill a whole page may be mistaken for columns.
+
+**Status (2026-10-15 14:33):** PDF upload + highlighting shipped. Segmentation and highlight geometry tested headless on generated one-column, table and two-column CVs with a stubbed model; not yet run against the real on-device model.
 
 **Storage note:** all `nlade-core.github.io/*` projects share one browser origin, so `localStorage` is shared across them too. Keys here are namespaced under `cvjdfit.` to avoid collisions with sibling projects.
 
