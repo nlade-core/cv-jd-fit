@@ -4,7 +4,8 @@
 //
 // Output of both segmentPdf() and segmentText():
 //   [{ kind: 'heading', text }
-//    { kind: 'seg', id: '12', text, heading, page?, boxes?, children?: [{ id: '12.1', text, boxes? }] }]
+//    { kind: 'seg', id: '12', text, heading, bullet, tabular, page?, boxes?, children?: [{ id: '12.1', text, boxes? }] }]
+// structure.js then adds section / role / dates / label.
 // boxes are { page, x, y, w, h } in PDF points, top-left origin.
 
 const BULLET_RE = /^\s*(?:[•·▪‣◦●○■□►▸➢✓✔*\-–—−]|\d{1,2}[.)])\s+/;
@@ -315,7 +316,7 @@ export function segmentPdf(pages) {
       cur.lines.push(l);
       continue;
     }
-    cur = { kind: 'seg', heading, page: l.page, lines: [l], text: l.text, pieces: l.pieces.slice(), indent: l.indent, tabular: l.tabular };
+    cur = { kind: 'seg', heading, page: l.page, lines: [l], text: l.text, pieces: l.pieces.slice(), indent: l.indent, tabular: l.tabular, bullet: l.bullet };
     segs.push(cur);
   }
 
@@ -362,7 +363,6 @@ export function segmentText(raw) {
     prevLong = t.length >= longLen;
   }
   numberAndSplit(segs);
-  for (const s of segs) { delete s.bullet; }
   return segs;
 }
 

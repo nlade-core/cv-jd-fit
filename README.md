@@ -1,6 +1,6 @@
 # cv-jd-fit
 
-Paste a job description, get a fit score against a CV — scored entirely on-device via Chrome's built-in AI. Nothing you paste is ever sent to a server.
+Paste a job description, add a CV (or a folder of them), and see the evidence for each requirement, entirely on-device via Chrome's built-in AI. Nothing you paste is ever sent to a server.
 
 ## Why this exists
 
@@ -8,31 +8,26 @@ First validation step for an on-device CV↔JD matching tool: before building re
 
 **Result: yes.** Tested against two real, contrasting postings pulled live from Greenhouse and AI Dev Jobs — a backend/React/TypeScript role scored 78/100 against the sample CV's actual stack, a senior ML engineer role requiring production PyTorch/TensorFlow experience scored 30/100 against the same CV, which explicitly disclaims ML experience. The model correctly discriminated, and named the real, specific missing requirements in both cases rather than vague filler.
 
-## Scope (deliberately minimal)
+## How v2 works
 
-**In:**
-- Editable CV text, persisted to `localStorage` (namespaced key, scoped to this browser only — see note below)
-- Paste-a-JD, get matched skills + gaps (each tagged `required`/`preferred`, from the job description's own wording) + a one-line summary
-- The score is **computed, not model-generated** — a plain weighted formula over the matched/gap lists (required items count double), so the number is always traceable back to the visible lists rather than a separate, unverifiable LLM guess
-- Model availability check with a visible status pill (not a silent failure if unsupported)
-- CV as a PDF upload (paste still works), with evidence highlighting — see below
+Lesson from a benchmark of a small on-device model on CV evidence: it gets much worse as prompts grow, it often answers a silent "no" with no evidence, and it is bad at met/partial/no verdicts. So prompts stay small, the model is asked only for evidence, and code decides everything else.
 
-**Explicitly not built yet** — cut so this MVP could ship fast and test the real unknown:
-- Recruiter vs. candidate persona split
-- Many-to-one batching (many CVs, or many JDs)
-- OCR fallback (only needed for the deck↔thesis sibling idea — CVs and JDs test clean as plain text)
-- Any "review/edit extracted text" flow
-- History/export of past matches (currently only the single latest CV + JD persist)
+- **Starts early.** On load the page checks the model and creates its base sessions. On a first visit a short animated explainer shows the download progress and disappears once the model is ready. A PDF is parsed the moment it's picked. JD criteria are extracted the moment the JD is pasted (debounced), so only the matching is left once both are in.
+- **Structured CV segments.** `segment.js` handles layout (columns, wrapped lines, packed skills lists into `14.1`, `14.2`, …). `structure.js` adds `{id, section, role, dates, page, boxes, text, label}`. Sections come from headings (experience / skills / education / profile / certifications / other). Experience lines get their role title and dates. Labels are built by code, e.g. "Experience › Data Scientist (2017–2021) › line 1". The model only sees a compact numbered view with section and role header lines, never the JSON.
+- **JD criteria.** Code keeps the requirement sections (essential, desirable, requirements, "you'll have", …) and drops company blurb, duties, benefits and equal-opportunity text. If there are no such headings it reads the whole JD. The model turns each line into a short criterion typed skill / years / degree / domain / leadership / other, marked required or preferred; an explicit "Desirable" or "Essential" heading overrides that tag. You edit, delete, add or retype the criteria, then confirm once per role. Confirmed criteria are saved in this browser, keyed by a hash of the JD.
+- **Routing, in code.** degree → education + certifications; skill → skills + experience + profile; domain / leadership → experience + profile; other → everything. Each criterion is one call on a `clone()` of the base session, run sequentially, seeing only its routed lines. If a CV has none of those sections, the whole CV is used.
+- **Years, in code, no model call.** Every dated role under Experience counts, except career breaks and similar, which are listed as not counted. Overlapping dates are merged, and a bare year counts January to December. The row shows each role's months and the total.
+- **Status, in code.** The model returns evidence IDs tagged direct or indirect. **Met** means at least one direct line, **Possible** means indirect lines only, **Not found** means none. Years: Met if the total reaches the required number, Possible if there is some dated experience but not enough. There is never a "No". Each criterion opens to show its evidence lines with labels; clicking a line highlights it on the PDF. You can remove lines, add lines (click the CV while a criterion is open, or use the "Add a line" menu) and override the status. Overrides are marked.
+- **Score.** Met 1, Possible ½, Not found 0; required criteria count double.
+- **Batch.** Choose a folder (`showDirectoryPicker`) or several PDF files. CVs are checked one after another into a table of candidates × criteria with a score column, sortable by score. It shows a progress bar with an estimate of the time left, per-file parse warnings and a Stop button that keeps the rows done so far. Clicking a row opens that candidate's evidence view. Nothing is written to the folder.
+- **Parse warnings.** Pages with little or no text (likely scanned) and text that looks garbled are flagged.
+- **Timer and network counter.** The timer runs from "both inputs ready" and shows the time to the first result and to the last. A live counter (PerformanceObserver on resource entries) counts any request to another origin; it should stay at "0 bytes sent".
 
-## PDF upload and evidence highlighting
+**Status (2026-10-15 15:06):** v2 shipped. Tested headless with a stubbed model on generated one-column, table, two-column and long CVs plus an image-only PDF (38/38 checks: streaming, routing, years, statuses, dropdowns, overrides, batch + stop, explainer, network counter). **Not yet run against the real on-device model**, so speed, evidence quality and `clone()`/`responseConstraint` behaviour are unverified.
 
-- The CV can be uploaded as a PDF. It is read in the page with [pdf.js](https://github.com/mozilla/pdf.js) **6.3.289** (`pdfjs-dist`, Apache-2.0), vendored in `vendor/pdfjs/` with its `LICENSE` and the standard fonts (Foxit/Liberation licences included). No CDN.
-- `segment.js` splits the CV into numbered segments in code: text items are grouped into lines by position (two-column layouts are detected and read column by column), wrapped lines are merged into one segment, and packed skills lines are split into sub-segments (`14.1`, `14.2`, …). Pasted text gets the same treatment by bullets, blank lines and list splitting.
-- The model sees `[12] text…` lines and returns, for each matched item, the IDs of the lines that support it (structured output via `responseConstraint`, with a plain-JSON fallback). Unknown IDs are discarded; any quoted text you see is copied from the segments by code.
-- The result shows the original PDF pages with translucent highlights: every evidence line is tinted, selecting a matched item highlights its lines and scrolls to the first, hovering a highlight lists the criteria it supports. Gaps have no highlight.
-- **Limits:** scanned PDFs (no text layer) and PDFs with broken text encoding can't be read; Word files aren't supported. Tables that fill a whole page may be mistaken for columns.
+PDFs are read in the page with [pdf.js](https://github.com/mozilla/pdf.js) **6.3.289** (`pdfjs-dist`, Apache-2.0), vendored in `vendor/pdfjs/` with its `LICENSE` and the standard fonts (Foxit/Liberation licences included). No CDN.
 
-**Status (2026-10-15 14:33):** PDF upload + highlighting shipped. Segmentation and highlight geometry tested headless on generated one-column, table and two-column CVs with a stubbed model; not yet run against the real on-device model.
+**Not built:** OCR for scanned PDFs, Word files, writing results back to the folder, export/history.
 
 **Storage note:** all `nlade-core.github.io/*` projects share one browser origin, so `localStorage` is shared across them too. Keys here are namespaced under `cvjdfit.` to avoid collisions with sibling projects.
 
@@ -44,4 +39,4 @@ Needs a recent desktop Chrome with the on-device model (Prompt API / `LanguageMo
 python3 -m http.server 8000
 ```
 
-then open `http://localhost:8000`. If the status pill says "needs download," the first click on "Check fit" will trigger it — that's expected and only happens once.
+then open `http://localhost:8000`. If the status pill says "needs download", the first click or key press on the page starts the one-time download.

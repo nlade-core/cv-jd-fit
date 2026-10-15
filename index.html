@@ -4,14 +4,48 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>cv-jd-fit</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
     <h1>cv-jd-fit</h1>
-    <p class="tagline">Paste a job description. See how a CV stacks up — entirely in your browser.</p>
-    <span id="status-pill" class="status-pill">checking model…</span>
+    <p class="tagline">Paste a job description, add a CV, see the evidence for each requirement — entirely in your browser.</p>
+    <div class="header-row">
+      <span id="status-pill" class="status-pill">checking model…</span>
+      <span id="net-counter" class="net-counter" title="Counts every request this page makes to any other website, live. The on-device model download is handled by the browser itself, not by this page.">
+        <span class="net-dot" aria-hidden="true"></span><span id="net-text">0 bytes sent</span>
+      </span>
+    </div>
   </header>
+
+  <section id="explainer" class="explainer" hidden aria-labelledby="explainer-title">
+    <div class="dl-row">
+      <h2 id="explainer-title">Getting the on-device model ready</h2>
+      <span id="dl-text" class="dl-text" aria-live="polite">Starting download…</span>
+    </div>
+    <progress id="dl-progress" max="1" value="0" aria-label="Model download"></progress>
+    <p id="dl-activate" class="dl-activate" hidden>Click anywhere or press a key to start the one-time download.</p>
+    <ol class="steps">
+      <li style="--i:0">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><path class="ln" d="M12 6h17l8 8v28H12z"/><path class="ln" d="M29 6v8h8"/><path class="fill-line" d="M17 22h14M17 28h14M17 34h9"/></svg>
+        <strong>Read the PDF</strong><span>Code reads the text and layout in this page.</span>
+      </li>
+      <li style="--i:1">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><path class="ln" d="M8 10h32v28H8z"/><path class="fill-line" d="M14 18h4M22 18h12M14 25h4M22 25h12M14 32h4M22 32h8"/></svg>
+        <strong>Find the requirements</strong><span>The job ad becomes a short checklist you confirm.</span>
+      </li>
+      <li style="--i:2">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><circle class="ln" cx="21" cy="21" r="11"/><path class="ln" d="M29 29l11 11"/><path class="fill-line" d="M16 21h10"/></svg>
+        <strong>Find the evidence</strong><span>The model points at CV lines; code sets each status.</span>
+      </li>
+      <li style="--i:3">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><circle class="ln" cx="24" cy="24" r="17"/><path class="fill-line" d="M16 24l6 6 11-12"/></svg>
+        <strong>You decide</strong><span>Check, add or remove evidence and override any status.</span>
+      </li>
+    </ol>
+    <p class="lock">Nothing you add is sent anywhere. The model runs on this device; this one-time download comes from your browser, not from this page.</p>
+  </section>
 
   <main>
     <section class="panel" id="cv-panel">
@@ -21,48 +55,70 @@
         <button type="button" id="cv-file-clear" class="link-btn" hidden>Use pasted text instead</button>
         <span id="cv-file-status" class="cv-file-status" aria-live="polite">or paste the text below</span>
       </div>
+      <ul id="cv-warnings" class="warnings" hidden></ul>
       <textarea id="cv-text" rows="14" aria-label="CV text"></textarea>
     </section>
 
     <section class="panel" id="jd-panel">
       <h2>Job description</h2>
-      <textarea id="jd-input" placeholder="Paste a job description here…" rows="14"></textarea>
-      <button id="run-btn" disabled>Check fit</button>
-      <p id="note" class="note"></p>
+      <textarea id="jd-input" placeholder="Paste a job description here…" rows="8" aria-label="Job description"></textarea>
+      <div id="criteria-box" class="criteria-box" hidden>
+        <h3>Criteria <span id="criteria-state" class="crit-state"></span></h3>
+        <p id="criteria-source" class="hint"></p>
+        <ul id="criteria-list" class="criteria-list"></ul>
+        <div class="criteria-actions">
+          <button type="button" id="crit-add" class="link-btn">+ Add criterion</button>
+          <button type="button" id="crit-confirm" class="primary-btn">Confirm criteria</button>
+        </div>
+      </div>
+      <p id="note" class="note" aria-live="polite"></p>
     </section>
 
-    <section class="panel" id="result-panel" hidden>
+    <section class="panel wide" id="result-panel" hidden>
       <div class="result-layout">
-      <div class="result-main">
-      <h2>Result</h2>
-      <div class="score-row">
-        <div class="score" id="score-value">–</div>
-        <div class="score-label">/ 100</div>
-      </div>
-      <p class="score-note">Computed from the matched/gap lists below, not a separate model guess — required items count double.</p>
-      <p id="summary"></p>
-      <div class="cols">
-        <div>
-          <h3>Matched</h3>
-          <p class="list-hint">Select an item to see the CV lines behind it.</p>
-          <ul id="matched-list"></ul>
+        <div class="result-main">
+          <h2 id="result-title">Result</h2>
+          <p id="timer" class="timer" aria-live="off"></p>
+          <div class="score-row">
+            <div class="score" id="score-value">–</div>
+            <div class="score-label">/ 100</div>
+          </div>
+          <p class="score-note" id="score-note"></p>
+          <p class="list-hint">Open a criterion to see its evidence. While one is open, click a line on the CV to add it as evidence.</p>
+          <ul id="crit-results" class="crit-results"></ul>
         </div>
-        <div>
-          <h3>Gaps</h3>
-          <ul id="gaps-list"></ul>
+        <div class="evidence">
+          <h3>The CV</h3>
+          <div id="evidence-view" class="evidence-view"></div>
         </div>
       </div>
+    </section>
+
+    <section class="panel wide" id="batch-panel">
+      <h2>Compare a folder of CVs</h2>
+      <p class="hint">Checks every PDF against the confirmed criteria, one after another. Files are read in this page; nothing is written to the folder.</p>
+      <div class="batch-actions">
+        <button type="button" id="batch-pick" class="primary-btn" hidden disabled>Choose folder</button>
+        <label class="file-btn" id="batch-files-label" aria-disabled="true"><input type="file" id="batch-files" accept="application/pdf,.pdf" multiple disabled>Choose PDF files</label>
+        <button type="button" id="batch-stop" class="stop-btn" hidden>Stop</button>
+        <span id="batch-hint" class="hint">Confirm the criteria first.</span>
       </div>
-      <div class="evidence">
-        <h3>Evidence in the CV</h3>
-        <div id="evidence-view" class="evidence-view"></div>
+      <div id="batch-progress" class="batch-progress" hidden>
+        <progress id="batch-bar" max="1" value="0" aria-label="Batch progress"></progress>
+        <span id="batch-eta" aria-live="polite"></span>
       </div>
+      <p id="batch-skipped" class="hint" hidden></p>
+      <div class="table-wrap">
+        <table id="batch-table" class="batch-table" hidden>
+          <thead></thead>
+          <tbody></tbody>
+        </table>
       </div>
     </section>
   </main>
 
   <footer>
-    <p>Runs entirely on your device via Chrome's built-in AI. The CV (pasted or PDF) and job description never leave this page — no server, no network request, nothing to verify but your own devtools Network tab.</p>
+    <p>Runs entirely on your device via Chrome's built-in AI. The CV (pasted or PDF) and job description never leave this page — no server, no network request. The counter at the top counts any request to another site, live.</p>
   </footer>
 
   <div id="hl-tip" class="hl-tip" role="tooltip" hidden></div>
