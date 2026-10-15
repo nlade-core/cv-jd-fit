@@ -2,8 +2,8 @@
  "format": "cv-jd-fit",
  "version": 1,
  "mode": "hiring",
- "createdAt": "2026-10-15T14:41:47.779Z",
- "exportedAt": "2026-10-15T14:41:47.779Z",
+ "createdAt": "2026-10-15T14:49:16.971Z",
+ "exportedAt": "2026-10-15T14:49:16.971Z",
  "app": {
   "page": "headless local run"
  },
@@ -590,8 +590,6 @@
      "state": "done",
      "years": {
       "need": 5,
-      "months": 122,
-      "status": "met",
       "roles": [
        {
         "title": "Senior BI Analyst Brightmart Retail",
@@ -602,6 +600,7 @@
         ],
         "months": 42,
         "counted": true,
+        "brk": false,
         "ids": [
          "3"
         ]
@@ -615,6 +614,7 @@
         ],
         "months": 16,
         "counted": true,
+        "brk": false,
         "ids": [
          "4"
         ]
@@ -628,11 +628,14 @@
         ],
         "months": 64,
         "counted": true,
+        "brk": false,
         "ids": [
          "5"
         ]
        }
-      ]
+      ],
+      "months": 122,
+      "status": "met"
      },
      "evidence": [
       {
@@ -692,7 +695,8 @@
        "14"
       ],
       "fallback": false,
-      "model": true
+      "model": true,
+      "chunks": 1
      },
      "override": null
     },
@@ -728,7 +732,8 @@
        "14"
       ],
       "fallback": false,
-      "model": true
+      "model": true,
+      "chunks": 1
      },
      "override": null
     },
@@ -749,7 +754,8 @@
        "15"
       ],
       "fallback": false,
-      "model": true
+      "model": true,
+      "chunks": 1
      },
      "override": null
     },
@@ -779,7 +785,8 @@
        "14"
       ],
       "fallback": false,
-      "model": true
+      "model": true,
+      "chunks": 1
      },
      "override": null
     },
@@ -814,7 +821,8 @@
        "9"
       ],
       "fallback": false,
-      "model": true
+      "model": true,
+      "chunks": 1
      },
      "override": null
     },
@@ -838,13 +846,14 @@
        "9"
       ],
       "fallback": false,
-      "model": true
+      "model": true,
+      "chunks": 1
      },
      "override": null
     }
    ],
    "timing": {
-    "firstMs": 7,
+    "firstMs": 6,
     "totalMs": 1524
    },
    "stopped": false,
@@ -857,6 +866,6 @@
   "note": "Recorded example. Produced by running this page's own pipeline headless with a keyword-rule test stand-in in place of the on-device model. It is NOT on-device model output.",
   "cv": "samples/sample-cv.pdf (synthetic CV, generated from cv-evidence-bench syn03_partial_table.md)",
   "jd": "samples/sample-jd.txt (made up)",
-  "generatedAt": "2026-10-15T14:41:47.781Z"
+  "generatedAt": "2026-10-15T14:49:16.973Z"
  }
 }

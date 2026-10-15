@@ -295,6 +295,7 @@ footer {
 .ev-none { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.3rem; }
 .ev-add, .ovr { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--muted); margin-top: 0.35rem; }
 .ev-add select { flex: 1; width: 0; }
+.yr-check { margin: 0.3rem 0.1rem 0 0; flex: none; width: 1rem; height: 1rem; accent-color: var(--accent); }
 .years-sum { font-size: 0.85rem; font-weight: 600; margin: 0.2rem 0 0.3rem; }
 
 /* the document view */

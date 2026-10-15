@@ -2,7 +2,7 @@
 // A candidate is { cv, criteria, results, timing, frame: 'hiring'|'seeker'|'replay',
 // title?, readonly?, onChange?, stopped? }.
 
-import { matchCandidate, effectiveStatus, derivedStatus, computeScore, SCORE_EXPLAINER, STATUS_LABEL, sectionList } from './match.js';
+import { matchCandidate, effectiveStatus, derivedStatus, computeScore, SCORE_EXPLAINER, STATUS_LABEL, sectionList, recountYears, yearsEvidence } from './match.js';
 import { renderPdf } from './pdf.js';
 
 const $ = (id) => document.getElementById(id);
@@ -199,18 +199,38 @@ function updateRow(i) {
 
   if (r.years) {
     const y = r.years;
-    body.append(el('p', 'routed', `Computed in code, no model call. Every dated role under Experience counts; overlapping dates are merged; a bare year counts from January to December.`));
-    const ul = el('ul', 'ev-lines');
-    for (const role of y.roles) {
+    body.append(el('p', 'routed', shown.readonly
+      ? 'Computed in code, no model call. Ticked roles count; overlapping dates are merged; a bare year counts from January to December.'
+      : 'Computed in code, no model call. Untick a role that shouldn\'t count (for example one outside this field); the total and status update. Overlapping dates are merged; a bare year counts from January to December.'));
+    const ul = el('ul', 'ev-lines years-roles');
+    y.roles.forEach((role) => {
       const row = el('li', 'ev-line' + (role.counted ? '' : ' muted'));
+      const why = role.undated ? 'no dates, not counted (fix the dates in the parse check)' : role.counted ? `${role.months} months` : role.brk && !role.byYou ? `${role.months} months, not counted (career break)` : `${role.months} months, not counted`;
+      if (!shown.readonly) {
+        const cb = el('input', 'yr-check');
+        cb.type = 'checkbox';
+        cb.checked = !!role.counted;
+        cb.disabled = !role.dates;
+        cb.setAttribute('aria-label', `Count ${role.title} (${role.span}) towards years of experience`);
+        cb.addEventListener('change', () => {
+          role.counted = cb.checked;
+          role.byYou = true;
+          recountYears(y);
+          r.evidence = yearsEvidence(y);
+          edited(i);
+          critResults.children[i]?.querySelectorAll('.yr-check')[y.roles.indexOf(role)]?.focus();
+        });
+        row.append(cb);
+      }
       const go = el('button', 'ev-go');
       go.type = 'button';
-      go.append(el('span', 'ev-label', `${role.span}${role.counted ? ` · ${role.months} months` : ' · not counted (career break)'}`), el('span', 'ev-text', role.title));
-      if (role.ids[0]) go.addEventListener('click', () => focusLine(role.ids[0]));
+      go.append(el('span', 'ev-label', `${role.span} · ${why}`), el('span', 'ev-text', role.title));
+      if (role.ids?.[0]) go.addEventListener('click', () => focusLine(role.ids[0]));
       else go.disabled = true;
       row.append(go);
+      if (role.byYou) { const tags = el('span', 'ev-tags'); tags.append(el('span', 'kind-tag you', 'changed by you')); row.append(tags); }
       ul.append(row);
-    }
+    });
     body.append(ul);
     const yrs = (y.months / 12).toFixed(1);
     body.append(el('p', 'years-sum', `Total ${y.months} months (${yrs} years) against ${y.need} required → ${STATUS_LABEL[y.status]}.`));

@@ -265,16 +265,24 @@ export function compactView(segs, sections) {
 export function computeYears(roles, now = new Date()) {
   const spans = roles.filter(hasDates).map((r) => {
     const a = monthIndex(r.dates[0], false, now), b = monthIndex(r.dates[1], true, now);
-    return { role: r, a, b: Math.max(a, b), months: Math.max(0, b - a + 1), counted: r.counted };
+    return { role: r, months: Math.max(0, b - a + 1), counted: r.counted };
   });
-  const sorted = spans.filter((s) => s.counted).sort((p, q) => p.a - q.a);
+  return { months: mergedMonths(spans.filter((s) => s.counted).map((s) => s.role.dates), now), roles: spans };
+}
+
+// Total months covered by a list of [start, end] date pairs, overlaps merged.
+export function mergedMonths(datesList, now = new Date()) {
+  const sorted = datesList.filter((d) => d?.[0] && d?.[1]).map((d) => {
+    const a = monthIndex(d[0], false, now);
+    return { a, b: Math.max(a, monthIndex(d[1], true, now)) };
+  }).sort((p, q) => p.a - q.a);
   let total = 0, cur = null;
   for (const s of sorted) {
     if (!cur || s.a > cur.b + 1) { if (cur) total += cur.b - cur.a + 1; cur = { a: s.a, b: s.b }; }
     else cur.b = Math.max(cur.b, s.b);
   }
   if (cur) total += cur.b - cur.a + 1;
-  return { months: total, roles: spans.map(({ role, months, counted }) => ({ role, months, counted })) };
+  return total;
 }
 
 // ---------- parse warnings ----------

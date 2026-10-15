@@ -1,7 +1,7 @@
 // Matching, decided in code: which CV sections each criterion sees, what the
 // status is, and the score. The model only ever returns evidence IDs.
 
-import { SECTIONS, SECTION_NAMES, compactView, computeYears, dateSpan } from './structure.js';
+import { SECTIONS, SECTION_NAMES, compactView, computeYears, mergedMonths, hasDates, dateSpan } from './structure.js';
 import { buildIndex } from './segment.js';
 import { yearsNeeded } from './jd.js';
 import { findEvidence, measureTokens } from './model.js';
@@ -54,16 +54,24 @@ export function computeScore(criteria, results) {
   return total ? Math.round((100 * got) / total) : null;
 }
 
+// Every role under Experience is listed: dated ones ticked (career breaks and
+// similar unticked), undated ones unticked and unchangeable until dates are fixed.
+// The user can untick a role that shouldn't count; recountYears() then recomputes.
 export function yearsResult(crit, cv) {
-  const need = yearsNeeded(crit.text);
   const y = computeYears(cv.roles);
-  const counted = y.roles.filter((r) => r.counted);
-  const status = !counted.length ? 'notfound' : y.months >= need * 12 ? 'met' : 'possible';
-  return {
-    need, months: y.months, status,
-    roles: y.roles.map(({ role, months, counted }) => ({ title: role.title, span: dateSpan(role.dates), dates: role.dates, months, counted, ids: role.headerIds }))
-  };
+  const roles = y.roles.map(({ role, months, counted }) => ({ title: role.title, span: dateSpan(role.dates), dates: role.dates, months, counted, brk: !counted, ids: role.headerIds }));
+  for (const role of cv.roles) if (!hasDates(role)) roles.push({ title: role.title, span: 'no dates', dates: null, months: 0, counted: false, undated: true, ids: role.headerIds });
+  return recountYears({ need: yearsNeeded(crit.text), roles });
 }
+
+// Total and status from the ticked roles (also used after the user ticks or unticks one).
+export function recountYears(y) {
+  const counted = y.roles.filter((r) => r.counted && r.dates);
+  y.months = mergedMonths(counted.map((r) => r.dates));
+  y.status = !counted.length ? 'notfound' : y.months >= y.need * 12 ? 'met' : 'possible';
+  return y;
+}
+export const yearsEvidence = (y) => y.roles.filter((x) => x.counted).flatMap((x) => x.ids).map((id) => ({ id, kind: 'direct', by: 'code' }));
 
 // Model evidence -> leaf IDs that were actually shown to the model; direct wins over indirect.
 function resolve(raw, cv, allowed) {
@@ -133,7 +141,7 @@ export async function matchCandidate(cv, criteria, { onStart, onResult, signal }
     let r;
     if (crit.type === 'years' && yearsNeeded(crit.text) !== null) {
       const years = yearsResult(crit, cv);
-      r = { state: 'done', years, evidence: years.roles.filter((x) => x.counted).flatMap((x) => x.ids).map((id) => ({ id, kind: 'direct', by: 'code' })), routed: { sections: ['experience'], ids: [], model: false } };
+      r = { state: 'done', years, evidence: yearsEvidence(years), routed: { sections: ['experience'], ids: [], model: false } };
     } else {
       const rt = route(crit.type === 'years' ? { ...crit, type: 'other' } : crit, cv);
       const entry = { candidate: cv.name, criterion: crit.text, type: crit.type, sections: rt.sections, ids: rt.ids, chars: rt.view.length };
