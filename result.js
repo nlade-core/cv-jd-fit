@@ -216,7 +216,7 @@ function updateRow(i) {
     body.append(el('p', 'years-sum', `Total ${y.months} months (${yrs} years) against ${y.need} required → ${STATUS_LABEL[y.status]}.`));
   } else {
     const rt = r.routed;
-    body.append(el('p', 'routed', `Searched ${sectionList(rt.sections)} — ${rt.ids.length} lines${rt.fallback ? ' (no matching section found, so the whole CV)' : ''}.`));
+    body.append(el('p', 'routed', `Searched ${sectionList(rt.sections)} — ${rt.ids.length} lines${rt.chunks > 1 ? `, asked in ${rt.chunks} parts to keep each prompt short` : ''}${rt.fallback ? ' (no matching section found, so the whole CV)' : ''}.`));
     const ul = el('ul', 'ev-lines');
     if (!r.evidence.length) ul.append(el('li', 'ev-none', shown.readonly ? 'No supporting line found.' : 'No supporting line found. Click a line on the CV to add one.'));
     r.evidence.forEach((ev, k) => {

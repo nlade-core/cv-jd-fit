@@ -162,6 +162,19 @@ async function call(kind, system, text, schema, hint, signal) {
   });
 }
 
+// Input tokens for a piece of text: the model's own count when the session offers
+// one (measureInputUsage; countPromptTokens on older builds), else ~4 characters a token.
+export async function measureTokens(text) {
+  const est = { tokens: Math.ceil(text.length / 4), measured: false };
+  const s = bases?.evidence;
+  const fn = s && (s.measureInputUsage || s.countPromptTokens);
+  if (!fn) return est;
+  try {
+    const n = await enqueue(() => fn.call(s, text));
+    return Number.isFinite(n) ? { tokens: n, measured: true } : est;
+  } catch { return est; }
+}
+
 // -> [{ id, kind }]
 export async function findEvidence(criterionText, cvView, signal) {
   const data = await call('evidence', EVIDENCE_SYSTEM, `Criterion: ${criterionText}\n\nCV lines:\n${cvView}`, EVIDENCE_SCHEMA, EVIDENCE_HINT, signal);

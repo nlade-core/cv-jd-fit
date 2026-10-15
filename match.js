@@ -4,7 +4,8 @@
 import { SECTIONS, SECTION_NAMES, compactView, computeYears, dateSpan } from './structure.js';
 import { buildIndex } from './segment.js';
 import { yearsNeeded } from './jd.js';
-import { findEvidence } from './model.js';
+import { findEvidence, measureTokens } from './model.js';
+import { readStorage } from './store.js';
 
 export const ROUTES = {
   degree: ['education', 'certifications'],
@@ -80,6 +81,46 @@ function resolve(raw, cv, allowed) {
   return [...kinds].sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0])).map(([id, kind]) => ({ id, kind, by: 'model' }));
 }
 
+// Small on-device models get much worse as prompts grow, so a criterion's routed
+// lines are split into chunks of at most CHUNK_TOKENS, each asked on its own clone.
+// Override for tuning: localStorage 'cvjdfit.chunkTokens'.
+export const CHUNK_TOKENS = +readStorage('chunkTokens') || 600;
+
+// Splits a compact view into views of at most maxChars, cutting only between lines.
+// Each chunk repeats the section and role header lines its first line sits under.
+export function chunkView(view, maxChars) {
+  const chunks = [];
+  let sec = null, role = null, cur = [], size = 0, content = 0;
+  const flush = () => {
+    while (cur.length && /^#{2,3} /.test(cur[cur.length - 1])) cur.pop(); // no dangling headers at a chunk's end
+    if (content) chunks.push(cur.join('\n'));
+    cur = []; size = 0; content = 0;
+  };
+  for (const line of view.split('\n')) {
+    const isSec = line.startsWith('## '), isRole = line.startsWith('### ');
+    if (isSec) { sec = line; role = null; }
+    else if (isRole) role = line;
+    else if (content && size + line.length + 1 > maxChars) {
+      flush();
+      for (const h of [sec, role]) if (h) { cur.push(h); size += h.length + 1; }
+    }
+    cur.push(line); size += line.length + 1;
+    if (!isSec && !isRole) content++;
+  }
+  flush();
+  return chunks.length ? chunks : [view];
+}
+
+async function evidenceInChunks(text, view, signal) {
+  const m = await measureTokens(view);
+  if (m.tokens <= CHUNK_TOKENS) return { raw: await findEvidence(text, view, signal), chunks: 1, tokens: m.tokens, measured: m.measured };
+  const maxChars = Math.max(200, Math.floor((CHUNK_TOKENS * view.length) / m.tokens));
+  const parts = chunkView(view, maxChars);
+  const raw = [];
+  for (const part of parts) raw.push(...(await findEvidence(text, part, signal))); // direct beats indirect in resolve()
+  return { raw, chunks: parts.length, tokens: m.tokens, measured: m.measured };
+}
+
 export const routingLog = []; // { candidate, criterion, type, sections, ids, chars } -- for inspection in devtools
 if (typeof window !== 'undefined') window.cvjdfitRouting = routingLog;
 
@@ -95,10 +136,13 @@ export async function matchCandidate(cv, criteria, { onStart, onResult, signal }
       r = { state: 'done', years, evidence: years.roles.filter((x) => x.counted).flatMap((x) => x.ids).map((id) => ({ id, kind: 'direct', by: 'code' })), routed: { sections: ['experience'], ids: [], model: false } };
     } else {
       const rt = route(crit.type === 'years' ? { ...crit, type: 'other' } : crit, cv);
-      routingLog.push({ candidate: cv.name, criterion: crit.text, type: crit.type, sections: rt.sections, ids: rt.ids, chars: rt.view.length });
+      const entry = { candidate: cv.name, criterion: crit.text, type: crit.type, sections: rt.sections, ids: rt.ids, chars: rt.view.length };
+      routingLog.push(entry);
       try {
-        const raw = await findEvidence(crit.text, rt.view, signal);
-        r = { state: 'done', evidence: resolve(raw, cv, new Set(rt.ids)), routed: { sections: rt.sections, ids: rt.ids, fallback: rt.fallback, model: true } };
+        const { raw, chunks, tokens, measured } = await evidenceInChunks(crit.text, rt.view, signal);
+        Object.assign(entry, { tokens, measured, chunks });
+        if (chunks > 1) console.info(`cv-jd-fit: "${crit.text}" — ${rt.ids.length} lines, ~${tokens} tokens${measured ? '' : ' (estimated)'}, asked in ${chunks} chunks`);
+        r = { state: 'done', evidence: resolve(raw, cv, new Set(rt.ids)), routed: { sections: rt.sections, ids: rt.ids, fallback: rt.fallback, model: true, chunks } };
       } catch (e) {
         if (signal?.aborted) throw e;
         r = { state: 'error', error: e.message, evidence: [], routed: { sections: rt.sections, ids: rt.ids, model: true } };
