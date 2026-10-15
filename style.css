@@ -12,6 +12,7 @@ button { cursor: pointer; }
   --panel: #ffffff;
   --text: #1a1a1a;
   --muted: #6b6b6b;
+  --nf: #484848; /* 'Not found' badge text: >= 4.5:1 on its tint */
   --border: #e2e2df;
   --accent: #2b6cb0;
   --accent-text: #ffffff;
@@ -28,6 +29,7 @@ button { cursor: pointer; }
     --panel: #1f2023;
     --text: #eaeaea;
     --muted: #9a9a9a;
+    --nf: #cfcfcf;
     --border: #33343a;
     --accent: #5b9bd5;
     --accent-text: #0b0b0c;
@@ -43,6 +45,7 @@ button { cursor: pointer; }
   --panel: #1f2023;
   --text: #eaeaea;
   --muted: #9a9a9a;
+    --nf: #cfcfcf;
   --border: #33343a;
   --accent: #5b9bd5;
   --accent-text: #0b0b0c;
@@ -273,7 +276,7 @@ footer {
 .status-badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.12rem 0.55rem; border-radius: 6px; border: 1.5px solid transparent; white-space: nowrap; }
 .status-badge.met { background: color-mix(in srgb, var(--good) 20%, transparent); color: var(--good); }
 .status-badge.possible { background: color-mix(in srgb, var(--warn) 20%, transparent); color: var(--warn); }
-.status-badge.notfound { background: var(--border); color: var(--muted); }
+.status-badge.notfound { background: var(--border); color: var(--nf); }
 .status-badge.pending, .status-badge.running { background: none; color: var(--muted); font-weight: 400; }
 .status-badge.running { animation: pulse 1.2s ease-in-out infinite; }
 .status-badge.error { color: var(--bad); }
