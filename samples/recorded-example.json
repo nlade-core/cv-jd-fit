@@ -2,8 +2,8 @@
  "format": "cv-jd-fit",
  "version": 1,
  "mode": "hiring",
- "createdAt": "2026-10-15T15:01:00.688Z",
- "exportedAt": "2026-10-15T15:01:00.688Z",
+ "createdAt": "2026-10-15T15:04:44.804Z",
+ "exportedAt": "2026-10-15T15:04:44.804Z",
  "app": {
   "page": "headless local run"
  },
@@ -598,7 +598,7 @@
       "need": 5,
       "roles": [
        {
-        "title": "Senior BI Analyst",
+        "title": "Senior BI Analyst, Brightmart Retail",
         "span": "2023–present",
         "dates": [
          "2023-05",
@@ -609,10 +609,11 @@
         "brk": false,
         "ids": [
          "2"
-        ]
+        ],
+        "offField": false
        },
        {
-        "title": "Reporting Analyst",
+        "title": "Reporting Analyst, Brightmart Retail",
         "span": "2022–2023",
         "dates": [
          "2022-01",
@@ -623,25 +624,28 @@
         "brk": false,
         "ids": [
          "3"
-        ]
+        ],
+        "offField": false
        },
        {
-        "title": "Store Manager",
+        "title": "Store Manager, Brightmart Retail",
         "span": "2016–2021",
         "dates": [
          "2016-09",
          "2021-12"
         ],
         "months": 64,
-        "counted": true,
+        "counted": false,
         "brk": false,
         "ids": [
          "4"
-        ]
+        ],
+        "offField": true
        }
       ],
-      "months": 122,
-      "status": "met"
+      "months": 58,
+      "status": "possible",
+      "pick": "model"
      },
      "evidence": [
       {
@@ -651,11 +655,6 @@
       },
       {
        "id": "3",
-       "kind": "direct",
-       "by": "code"
-      },
-      {
-       "id": "4",
        "kind": "direct",
        "by": "code"
       }
@@ -856,8 +855,8 @@
     }
    ],
    "timing": {
-    "firstMs": 7,
-    "totalMs": 1523
+    "firstMs": 129,
+    "totalMs": 1647
    },
    "stopped": false,
    "failed": false
@@ -869,6 +868,6 @@
   "note": "Recorded example. Produced by running this page's own pipeline headless with a keyword-rule test stand-in in place of the on-device model. It is NOT on-device model output.",
   "cv": "samples/sample-cv.pdf (synthetic CV, generated from cv-evidence-bench syn03_partial_table.md)",
   "jd": "samples/sample-jd.txt (made up)",
-  "generatedAt": "2026-10-15T15:01:00.690Z"
+  "generatedAt": "2026-10-15T15:04:44.805Z"
  }
 }

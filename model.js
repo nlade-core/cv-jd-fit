@@ -59,6 +59,14 @@ const CRITERIA_SCHEMA = {
 };
 const CRITERIA_HINT = '\n\nRespond with only this JSON shape: {"criteria":[{"text":"Python","type":"skill","importance":"required","line":3}]}';
 
+const ROLES_SYSTEM = `You decide which jobs count towards a years-of-experience requirement.
+Jobs are numbered like [2], with title and employer. Return the numbers of the jobs whose work is in the field the requirement names, or closely related to it. Respond only with JSON.`;
+const ROLES_SCHEMA = {
+  type: 'object', additionalProperties: false, required: ['roles'],
+  properties: { roles: { type: 'array', items: { type: 'integer' } } }
+};
+const ROLES_HINT = '\n\nRespond with only this JSON shape: {"roles":[1,3]}';
+
 // ---------- state ----------
 
 const listeners = new Set();
@@ -153,6 +161,8 @@ async function call(kind, system, text, schema, hint, signal) {
   const b = await whenReady();
   return enqueue(async () => {
     signal?.throwIfAborted();
+    // A base that isn't made at load (the roles one) is created on first use, then cloned.
+    if (!b[kind]) b[kind] = await LanguageModel.create({ ...LANG, signal, initialPrompts: [{ role: 'system', content: system }] });
     const session = await fork(b[kind], system, signal);
     try {
       return extractJson(await promptJson(session, text, schema, hint, signal));
@@ -185,4 +195,13 @@ export async function findEvidence(criterionText, cvView, signal) {
 export async function extractCriteria(numbered, signal) {
   const data = await call('extract', EXTRACT_SYSTEM, `Requirement lines:\n${numbered}`, CRITERIA_SCHEMA, CRITERIA_HINT, signal);
   return Array.isArray(data.criteria) ? data.criteria : [];
+}
+
+// Years criteria: which roles are in the field. jobs: ['Senior BI Analyst, Brightmart Retail', ...]
+// -> 0-based indexes into jobs. Only call when the model is ready.
+export async function relevantRoles(criterionText, jobs, signal) {
+  const list = jobs.map((j, k) => `[${k + 1}] ${j}`).join('\n');
+  const data = await call('roles', ROLES_SYSTEM, `Requirement: ${criterionText}\n\nJobs:\n${list}`, ROLES_SCHEMA, ROLES_HINT, signal);
+  if (!Array.isArray(data.roles)) throw new Error('no roles list in the response');
+  return [...new Set(data.roles.map((n) => +n - 1).filter((k) => Number.isInteger(k) && k >= 0 && k < jobs.length))];
 }

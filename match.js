@@ -1,10 +1,10 @@
 // Matching, decided in code: which CV sections each criterion sees, what the
 // status is, and the score. The model only ever returns evidence IDs.
 
-import { SECTIONS, SECTION_NAMES, compactView, computeYears, mergedMonths, hasDates, dateSpan } from './structure.js';
+import { SECTIONS, SECTION_NAMES, compactView, computeYears, mergedMonths, hasDates, dateSpan, roleName } from './structure.js';
 import { buildIndex } from './segment.js';
 import { yearsNeeded } from './jd.js';
-import { findEvidence, measureTokens } from './model.js';
+import { findEvidence, measureTokens, relevantRoles, model } from './model.js';
 import { readStorage } from './store.js';
 
 export const ROUTES = {
@@ -59,9 +59,28 @@ export function computeScore(criteria, results) {
 // The user can untick a role that shouldn't count; recountYears() then recomputes.
 export function yearsResult(crit, cv) {
   const y = computeYears(cv.roles);
-  const roles = y.roles.map(({ role, months, counted }) => ({ title: role.title, span: dateSpan(role.dates), dates: role.dates, months, counted, brk: !counted, ids: role.headerIds }));
-  for (const role of cv.roles) if (!hasDates(role)) roles.push({ title: role.title, span: 'no dates', dates: null, months: 0, counted: false, undated: true, ids: role.headerIds });
+  const roles = y.roles.map(({ role, months, counted }) => ({ title: roleName(role), span: dateSpan(role.dates), dates: role.dates, months, counted, brk: !counted, ids: role.headerIds }));
+  for (const role of cv.roles) if (!hasDates(role)) roles.push({ title: roleName(role), span: 'no dates', dates: null, months: 0, counted: false, undated: true, ids: role.headerIds });
   return recountYears({ need: yearsNeeded(crit.text), roles });
+}
+
+// Pre-ticks only the roles the model judges to be in the criterion's field (one short
+// call: the criterion and the role titles, nothing else from the CV). Career breaks and
+// undated roles stay unticked. Without the model, or if the call fails, every dated role
+// stays ticked and y.pick says so.
+async function pickYearsRoles(crit, y, signal) {
+  const cands = y.roles.filter((r) => r.dates && !r.brk);
+  if (!cands.length) return y;
+  if (model.state !== 'ready') { y.pick = 'all-nomodel'; return y; }
+  try {
+    const keep = new Set(await relevantRoles(crit.text, cands.map((r) => r.title), signal));
+    cands.forEach((r, k) => { r.counted = keep.has(k); r.offField = !keep.has(k); });
+    y.pick = 'model';
+  } catch (e) {
+    if (signal?.aborted) throw e;
+    y.pick = 'all-failed';
+  }
+  return recountYears(y);
 }
 
 // Total and status from the ticked roles (also used after the user ticks or unticks one).
@@ -140,7 +159,7 @@ export async function matchCandidate(cv, criteria, { onStart, onResult, signal }
     onStart?.(i);
     let r;
     if (crit.type === 'years' && yearsNeeded(crit.text) !== null) {
-      const years = yearsResult(crit, cv);
+      const years = await pickYearsRoles(crit, yearsResult(crit, cv), signal);
       r = { state: 'done', years, evidence: yearsEvidence(years), routed: { sections: ['experience'], ids: [], model: false } };
     } else {
       const rt = route(crit.type === 'years' ? { ...crit, type: 'other' } : crit, cv);

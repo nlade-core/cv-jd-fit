@@ -199,13 +199,16 @@ function updateRow(i) {
 
   if (r.years) {
     const y = r.years;
-    body.append(el('p', 'routed', shown.readonly
-      ? 'Computed in code, no model call. Ticked roles count; overlapping dates are merged; a bare year counts from January to December.'
-      : 'Computed in code, no model call. Untick a role that shouldn\'t count (for example one outside this field); the total and status update. Overlapping dates are merged; a bare year counts from January to December.'));
+    const how = {
+      model: 'Roles in this field were picked by one short model call that saw only the role titles; the months are computed in code.',
+      'all-nomodel': 'The on-device model isn\'t available, so every dated role is ticked.',
+      'all-failed': 'Picking the roles in this field failed, so every dated role is ticked.'
+    }[y.pick] || 'Computed in code, no model call.';
+    body.append(el('p', 'routed', `${how} ${shown.readonly ? 'Ticked roles count' : 'Tick or untick a role to change what counts; the total and status update'}. Overlapping dates are merged; a bare year counts from January to December.`));
     const ul = el('ul', 'ev-lines years-roles');
     y.roles.forEach((role) => {
       const row = el('li', 'ev-line' + (role.counted ? '' : ' muted'));
-      const why = role.undated ? 'no dates, not counted (fix the dates in the parse check)' : role.counted ? `${role.months} months` : role.brk && !role.byYou ? `${role.months} months, not counted (career break)` : `${role.months} months, not counted`;
+      const why = role.undated ? 'no dates, not counted (fix the dates in the parse check)' : role.counted ? `${role.months} months` : role.brk && !role.byYou ? `${role.months} months, not counted (career break)` : role.offField && !role.byYou ? `${role.months} months, not counted (judged outside this field)` : `${role.months} months, not counted`;
       if (!shown.readonly) {
         const cb = el('input', 'yr-check');
         cb.type = 'checkbox';
