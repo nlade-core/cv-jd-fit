@@ -2,8 +2,8 @@
  "format": "cv-jd-fit",
  "version": 1,
  "mode": "hiring",
- "createdAt": "2026-10-15T14:28:47.546Z",
- "exportedAt": "2026-10-15T14:28:47.546Z",
+ "createdAt": "2026-10-15T14:41:47.779Z",
+ "exportedAt": "2026-10-15T14:41:47.779Z",
  "app": {
   "page": "headless local run"
  },
@@ -248,11 +248,11 @@
      ],
      "section": "experience",
      "dates": [
-      "2016-09",
-      "2021-12"
+      "2023-05",
+      "present"
      ],
-     "label": "Experience › Store Manager (2016–2021) › line 1",
-     "role": 2
+     "label": "Experience › Senior BI Analyst Brightmart Retail (2023–present) › line 1",
+     "role": 0
     },
     {
      "kind": "seg",
@@ -273,11 +273,11 @@
      ],
      "section": "experience",
      "dates": [
-      "2016-09",
-      "2021-12"
+      "2023-05",
+      "present"
      ],
-     "label": "Experience › Store Manager (2016–2021) › bullet 2",
-     "role": 2
+     "label": "Experience › Senior BI Analyst Brightmart Retail (2023–present) › bullet 2",
+     "role": 0
     },
     {
      "kind": "seg",
@@ -298,11 +298,11 @@
      ],
      "section": "experience",
      "dates": [
-      "2016-09",
-      "2021-12"
+      "2022-01",
+      "2023-04"
      ],
-     "label": "Experience › Store Manager (2016–2021) › line 3",
-     "role": 2
+     "label": "Experience › Reporting Analyst Brightmart Retail (2022–2023) › line 1",
+     "role": 1
     },
     {
      "kind": "seg",
@@ -326,7 +326,7 @@
       "2016-09",
       "2021-12"
      ],
-     "label": "Experience › Store Manager (2016–2021) › line 4",
+     "label": "Experience › Store Manager (2016–2021) › line 1",
      "role": 2
     },
     {
@@ -844,8 +844,8 @@
     }
    ],
    "timing": {
-    "firstMs": 2,
-    "totalMs": 1520
+    "firstMs": 7,
+    "totalMs": 1524
    },
    "stopped": false,
    "failed": false
@@ -857,6 +857,6 @@
   "note": "Recorded example. Produced by running this page's own pipeline headless with a keyword-rule test stand-in in place of the on-device model. It is NOT on-device model output.",
   "cv": "samples/sample-cv.pdf (synthetic CV, generated from cv-evidence-bench syn03_partial_table.md)",
   "jd": "samples/sample-jd.txt (made up)",
-  "generatedAt": "2026-10-15T14:28:47.547Z"
+  "generatedAt": "2026-10-15T14:41:47.781Z"
  }
 }

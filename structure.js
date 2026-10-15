@@ -199,15 +199,27 @@ export function setRoleTitle(role, title) {
 
 // A known role named again: by its title, by its company alone ("Lumen Retail Group"),
 // or as "Senior BI Analyst - first bullet…" when a heading ran into its first line.
+// Table rows can join title and employer with a plain space ("Senior BI Analyst
+// Brightmart Retail"), so the run-in form matches any leading run of at least two
+// words of the title (or its short form); the longest such match wins.
 function findRole(roles, text) {
   const t = cleanTitle(text).toLowerCase();
   if (!t) return null;
-  return roles.find((r) => {
+  const exact = roles.find((r) => {
     const title = r.title.toLowerCase(), short = r.short.toLowerCase();
-    if (t === title || t === short) return true;
-    if (t.length >= 6 && t.length <= 60 && title.includes(t)) return true;
-    return t.startsWith(short) && /^\s*[-–—:|]\s+\S/.test(t.slice(short.length));
-  }) || null;
+    return t === title || t === short || (t.length >= 6 && t.length <= 60 && title.includes(t));
+  });
+  if (exact) return exact;
+  let best = null, bestLen = 0;
+  for (const r of roles) {
+    const words = r.title.toLowerCase().split(/\s+/);
+    const cands = new Set([r.short.toLowerCase()]);
+    for (let k = 2; k <= words.length; k++) cands.add(words.slice(0, k).join(' '));
+    for (const p of cands) {
+      if (p.length > bestLen && t.startsWith(p) && /^\s*[-–—:|]\s+\S/.test(t.slice(p.length))) { best = r; bestLen = p.length; }
+    }
+  }
+  return best;
 }
 
 // Flat leaf list in document order: the units the model cites and the UI highlights.
