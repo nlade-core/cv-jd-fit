@@ -376,7 +376,8 @@ body[data-mode="splash"] main { display: none; }
 .splash-more { display: flex; flex-wrap: wrap; gap: 0.4rem 0.75rem; align-items: center; margin-top: 0.6rem; }
 
 /* job hunting: parse check */
-.parse-summary { font-size: 0.85rem; margin: 0.5rem 0 0.75rem; }
+.parse-top { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.9rem; margin: 0.5rem 0 0.75rem; }
+.parse-summary { font-size: 0.85rem; flex: 1 1 16rem; }
 .parse-list { display: grid; gap: 0.9rem; margin-bottom: 0.9rem; }
 .pc-sec-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); margin-bottom: 0.35rem; }
 .pc-role { border-left: 3px solid var(--border); padding-left: 0.6rem; margin-bottom: 0.6rem; }

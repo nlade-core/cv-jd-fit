@@ -12,43 +12,6 @@ import { readStorage, writeStorage, readJson } from './store.js';
 const CV_STORAGE_KEY = 'cv', JD_STORAGE_KEY = 'jd';
 const CRITERIA_KEY = (hash) => 'criteria.' + hash;
 
-const SAMPLE_CV_TEXT = `Alex Morgan
-Software Engineer
-
-SUMMARY
-Full-stack software engineer with 5 years of experience building and shipping
-web applications, internal tools, and APIs. Comfortable across the stack, with
-a focus on JavaScript/TypeScript and pragmatic, well-tested code.
-
-SKILLS
-JavaScript, TypeScript, Node.js, React, HTML/CSS, Python, REST APIs, SQL
-(PostgreSQL), Git, Docker, basic AWS (EC2, S3, Lambda), unit & integration
-testing (Jest), CI/CD pipelines (GitHub Actions).
-
-EXPERIENCE
-Software Engineer — Northwind Data (2022–present)
-- Built and maintained a React/TypeScript front end for an internal analytics
-  dashboard used by ~200 employees.
-- Designed and implemented REST APIs in Node.js backed by PostgreSQL.
-- Introduced automated testing (Jest) and a CI pipeline, cutting regression
-  bugs reported in production by roughly a third.
-- Migrated a legacy jQuery admin panel to React incrementally, with no
-  downtime.
-
-Junior Developer — Fenwick Software (2020–2022)
-- Worked on a customer-facing booking platform (Node.js, Express, MySQL).
-- Fixed bugs, wrote small features, and shadowed senior engineers on system
-  design decisions.
-- Wrote developer documentation for onboarding new hires.
-
-EDUCATION
-B.Sc. Computer Science — University of Leeds (2016–2019)
-
-OTHER
-Occasional open-source contributor. Comfortable working independently or in
-small cross-functional teams. No formal experience with mobile development,
-Kubernetes, or machine learning.`;
-
 const $ = (id) => document.getElementById(id);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 
@@ -79,7 +42,7 @@ export function initHiring({ onChange, setLastShown }) {
 
   // ---------- CV ----------
 
-  cvTextEl.value = readStorage(CV_STORAGE_KEY) ?? SAMPLE_CV_TEXT;
+  cvTextEl.value = readStorage(CV_STORAGE_KEY) ?? '';
   jdInput.value = readStorage(JD_STORAGE_KEY) ?? '';
 
   const cvFromTextarea = () => { const t = cvTextEl.value; cv = t.trim() ? cvFromText(t) : null; };
@@ -88,7 +51,7 @@ export function initHiring({ onChange, setLastShown }) {
   cvTextEl.addEventListener('input', () => {
     writeStorage(CV_STORAGE_KEY, cvTextEl.value);
     clearTimeout(cvTextTimer);
-    cvTextTimer = setTimeout(() => { cvFromTextarea(); maybeRun(); }, 900);
+    cvTextTimer = setTimeout(() => { cvFromTextarea(); maybeRun(false); }, 900);
   });
 
   function useTextSource() {
@@ -166,7 +129,7 @@ export function initHiring({ onChange, setLastShown }) {
     if (Array.isArray(saved) && saved.length) {
       editor.setSource('Loaded the criteria you confirmed earlier for this job description.');
       editor.set(saved, 'confirmed');
-      maybeRun();
+      maybeRun(false);
       return;
     }
     const ctrl = (extractAbort = new AbortController());
@@ -183,7 +146,9 @@ export function initHiring({ onChange, setLastShown }) {
 
   // ---------- single-CV run ----------
 
-  function maybeRun() {
+  // scroll: bring the result into view (not while the user is typing a CV).
+  function maybeRun(scroll = true) {
+    if (cv?.kind === 'pdf') cvFileStatus.textContent = pdfStatus(cv) + (editor.state === 'confirmed' ? '' : ' Results start once you confirm the criteria.');
     if (!cv || editor.state !== 'confirmed' || !editor.criteria.length) return;
     if (!modelUsable() && editor.criteria.some((c) => c.type !== 'years' || yearsNeeded(c.text) === null)) {
       note.textContent = 'Matching needs the on-device model, which isn\'t available here.';
@@ -192,7 +157,7 @@ export function initHiring({ onChange, setLastShown }) {
     const ctrl = (runAbort = new AbortController());
     single = { cv, criteria: editor.criteria.map((c) => ({ ...c })), results: [], timing: { t0: performance.now(), tFirst: null, tEnd: null }, frame: 'hiring', onChange };
     setLastShown(single);
-    runCandidate(single, ctrl.signal, true).catch(() => {}).finally(onChange);
+    runCandidate(single, ctrl.signal, scroll ? 'scroll' : true).catch(() => {}).finally(onChange);
   }
 
   batch = initBatch({

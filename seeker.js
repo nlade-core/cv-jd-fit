@@ -14,7 +14,7 @@ const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls)
 export function initSeeker({ onChange, setLastShown }) {
   const fileInput = $('seek-cv-file'), fileStatus = $('seek-cv-status'), warnings = $('seek-cv-warnings');
   const pasteText = $('seek-cv-text'), pasteUse = $('seek-cv-use');
-  const parsePanel = $('parse-panel'), parseList = $('parse-list'), parseConfirm = $('parse-confirm'), parseState = $('parse-state'), parseSummary = $('parse-summary');
+  const parsePanel = $('parse-panel'), parseList = $('parse-list'), parseConfirm = $('parse-confirm'), parseTop = $('parse-confirm-top'), parseEdit = $('parse-edit'), parseHint = $('parse-hint'), parseBottom = $('parse-bottom'), parseState = $('parse-state'), parseSummary = $('parse-summary');
   const jdPanel = $('seek-jd-panel'), jdInput = $('seek-jd-input'), jdAdd = $('seek-jd-add'), jdFiles = $('seek-jd-files'), jdList = $('seek-jd-list'), jdNote = $('seek-jd-note');
   const tablePanel = $('seek-table-panel'), table = $('seek-table');
 
@@ -22,6 +22,7 @@ export function initSeeker({ onChange, setLastShown }) {
   let jds = []; // { id, name, text, editor, li, cand, extracting, abort }
   let nextJd = 1;
   let runAbort = null;
+  let parseOpen = false; // the parse list stays open after confirming only when asked
 
   // ---------- CV ----------
 
@@ -36,6 +37,7 @@ export function initSeeker({ onChange, setLastShown }) {
     for (const w of c.warnings || []) warnings.append(el('li', null, w));
     warnings.hidden = !(c.warnings || []).length;
     parsePanel.hidden = false;
+    parseOpen = false;
     renderParse();
     renderJds();
     onChange();
@@ -189,15 +191,24 @@ export function initSeeker({ onChange, setLastShown }) {
     parseState.className = 'pc-state' + (cv.parseConfirmed ? ' ok' : '');
     parseState.textContent = cv.parseConfirmed ? 'Matching uses exactly this.' : 'Check the sections, roles and dates, then confirm.';
     jdPanel.hidden = !cv.parseConfirmed && !jds.length;
+    // Once confirmed, the list folds away to a one-line summary; "Show and fix" opens it again.
+    const folded = !!cv.parseConfirmed && !parseOpen;
+    parseList.hidden = parseHint.hidden = parseBottom.hidden = folded;
+    parseTop.hidden = !!cv.parseConfirmed;
+    parseTop.textContent = parseConfirm.textContent === 'This is right — continue' ? 'Looks right — continue' : parseConfirm.textContent;
+    parseEdit.hidden = !folded;
   }
 
+  parseEdit.addEventListener('click', () => { parseOpen = true; updateParseState(); parseList.querySelector('input, select')?.focus(); });
+  parseTop.addEventListener('click', () => parseConfirm.click());
   parseConfirm.addEventListener('click', () => {
     cv.parseConfirmed = true;
+    parseOpen = false;
     for (const j of jds) if (j.stale || !j.cand) { j.stale = false; j.dirty = true; }
     updateParseState();
     jdPanel.hidden = false;
     onChange();
-    if (!jds.length) jdInput.focus();
+    if (!jds.length) { jdPanel.scrollIntoView({ block: 'start' }); jdInput.focus({ preventScroll: true }); }
     pump();
   });
 
@@ -335,7 +346,7 @@ export function initSeeker({ onChange, setLastShown }) {
     const show = wasShown || !shownCandidate();
     if (show) setLastShown(cand);
     renderJds();
-    try { await runCandidate(cand, ctrl.signal, show); } catch { /* stopped */ } finally { running = null; renderJds(); onChange(); }
+    try { await runCandidate(cand, ctrl.signal, show && !wasShown ? 'scroll' : show); } catch { /* stopped */ } finally { running = null; renderJds(); onChange(); }
   }
 
   function showJd(j, scroll) {

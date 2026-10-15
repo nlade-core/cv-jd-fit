@@ -29,7 +29,7 @@ export const shownCandidate = () => shown;
 export async function runCandidate(cand, signal, show) {
   cand.results = cand.criteria.map(() => ({ state: 'pending', evidence: [], override: null }));
   cand.stopped = false;
-  if (show) showCandidate(cand);
+  if (show) showCandidate(cand, show === 'scroll');
   try {
     await matchCandidate(cand.cv, cand.criteria, {
       signal,

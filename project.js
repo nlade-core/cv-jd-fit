@@ -94,7 +94,7 @@ export function download(project) {
 function fileName(p) {
   const d = new Date(p.exportedAt);
   const pad = (n) => String(n).padStart(2, '0');
-  const stamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
+  const stamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
   return `cv-jd-fit-${p.mode === 'hiring' ? 'hiring' : 'job-hunting'}-${stamp}.json`;
 }
 

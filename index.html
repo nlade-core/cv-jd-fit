@@ -98,7 +98,7 @@
         <span id="cv-file-status" class="cv-file-status" aria-live="polite">or paste the text below</span>
       </div>
       <ul id="cv-warnings" class="warnings" hidden></ul>
-      <textarea id="cv-text" rows="14" aria-label="CV text"></textarea>
+      <textarea id="cv-text" rows="14" aria-label="CV text" placeholder="Paste a CV here, or upload a PDF above…"></textarea>
     </section>
 
     <!-- job hunting -->
@@ -118,10 +118,14 @@
 
     <section class="panel wide" id="parse-panel" data-views="seeker" hidden>
       <h2>2. Check how your CV was read</h2>
-      <p class="hint">Each line below is what the page read from your CV, grouped by section and, under Experience, by role with its dates. Matching and the years-of-experience count use exactly this, so fix anything that's wrong: change a line's section or role, or a role's title and dates.</p>
-      <p id="parse-summary" class="parse-summary"></p>
+      <p id="parse-hint" class="hint">Each line below is what the page read from your CV, grouped by section and, under Experience, by role with its dates. Matching and the years-of-experience count use exactly this, so fix anything that's wrong: change a line's section or role, or a role's title and dates.</p>
+      <div class="parse-top">
+        <p id="parse-summary" class="parse-summary"></p>
+        <button type="button" id="parse-confirm-top" class="primary-btn">Looks right — continue</button>
+        <button type="button" id="parse-edit" class="link-btn" hidden>Show and fix how it was read</button>
+      </div>
       <div id="parse-list" class="parse-list"></div>
-      <div class="criteria-actions">
+      <div class="criteria-actions" id="parse-bottom">
         <span id="parse-state" class="pc-state" aria-live="polite"></span>
         <button type="button" id="parse-confirm" class="primary-btn">This is right — continue</button>
       </div>
