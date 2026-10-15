@@ -9,9 +9,9 @@ import { readStorage } from './store.js';
 
 export const ROUTES = {
   degree: ['education', 'certifications'],
-  skill: ['skills', 'experience', 'profile'],
-  domain: ['experience', 'profile'],
-  leadership: ['experience', 'profile'],
+  skill: ['skills', 'experience', 'profile', 'projects'],
+  domain: ['experience', 'profile', 'projects'],
+  leadership: ['experience', 'profile', 'projects'],
   other: SECTIONS
 };
 

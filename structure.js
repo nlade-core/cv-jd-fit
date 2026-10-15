@@ -1,14 +1,14 @@
 // Adds structure to segment.js output, all in code:
-//   section  experience / skills / education / profile / certifications / other (from headings)
+//   section  experience / skills / education / profile / certifications / projects / other (from headings)
 //   role     { title, short, dates: [start, end] } for experience lines under a dated role
 //   label    "Experience › Performance Data Scientist (2022–present) › bullet 3"
 // and builds the compact numbered view the model sees, the years-of-experience
 // computation, and parse warnings.
 
-export const SECTIONS = ['profile', 'experience', 'skills', 'education', 'certifications', 'other'];
+export const SECTIONS = ['profile', 'experience', 'skills', 'education', 'certifications', 'projects', 'other'];
 export const SECTION_NAMES = {
   profile: 'Profile', experience: 'Experience', skills: 'Skills',
-  education: 'Education', certifications: 'Certifications', other: 'Other'
+  education: 'Education', certifications: 'Certifications', projects: 'Projects & publications', other: 'Other'
 };
 
 // Order matters: the first match wins.
@@ -18,11 +18,12 @@ const SECTION_RES = [
   ['skills', /skill|technolog|tool|stack|competenc|expertise|proficienc|languages?\b|keywords?/i],
   ['experience', /experience|employment|work history|career|positions?|professional background|work\b/i],
   ['profile', /profile|summary|about me|objective|personal statement|introduction/i],
-  ['other', /interest|hobb|reference|volunteer|publication|award|achievement|projects?\b|contact|personal|activities|talks|presentations|other/i]
+  ['projects', /projects?\b|publication|portfolio|talks|presentations|patents?\b|open[- ]source|research\b/i],
+  ['other', /interest|hobb|reference|volunteer|award|achievement|contact|personal|activities|other/i]
 ];
 
 // Plain lines only become headings when they are clearly just a section name.
-const PLAIN_HEADING_RE = /^(?:(?:professional|work|relevant|career|technical|key|core|personal|selected|employment)\s+)?(?:experience|employment(?: history)?|work history|career history|history|skills(?:\s+(?:and|&)\s+\w+)?|education|qualifications|profile|summary|about(?: me)?|certifications?|training|courses|interests|hobbies|references|volunteering|publications|projects|awards|achievements|languages|toolkit)\s*:?$/i;
+const PLAIN_HEADING_RE = /^(?:(?:professional|work|relevant|career|technical|key|core|personal|selected|employment)\s+)?(?:experience|employment(?: history)?|work history|career history|history|skills(?:\s+(?:and|&)\s+\w+)?|education|qualifications|profile|summary|about(?: me)?|certifications?|training|courses|interests|hobbies|references|volunteering|publications|projects|talks|patents|portfolio|research|awards|achievements|languages|toolkit)\s*:?$/i;
 
 function sectionOf(text) {
   const t = text.trim().replace(/:$/, '');
