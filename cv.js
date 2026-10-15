@@ -98,7 +98,7 @@ export function touchRole(cv, role) {
 
 // ---------- JSON form (project files) ----------
 
-const ROLE_KEYS = ['title', 'short', 'dates', 'headerIds', 'counted', 'fixed'];
+const ROLE_KEYS = ['title', 'short', 'employer', 'dates', 'headerIds', 'counted', 'fixed'];
 const SEG_KEYS = ['kind', 'id', 'text', 'heading', 'bullet', 'tabular', 'page', 'boxes', 'section', 'dates', 'label', 'roleLine', 'sub', 'fixed'];
 const CHILD_KEYS = ['id', 'text', 'range', 'boxes', 'kind', 'section', 'dates', 'page', 'parentId', 'label'];
 const pick = (o, keys) => { const r = {}; for (const k of keys) if (o[k] !== undefined) r[k] = o[k]; return r; };

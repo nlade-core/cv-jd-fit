@@ -82,18 +82,46 @@ function splitList(text, underSkills) {
   return null;
 }
 
+// Splits an inline run of achievements joined by spaced dashes ("Senior BI Analyst -
+// Own the weekly dashboard - Built the pipelines") into [start, end) ranges. Each
+// clause after the first must read like one: a capitalised word, then a word that
+// isn't Title Case ("Own the", "Wrote SQL"), at least three words. With two parts the
+// first must be a clause too; with three or more it may be a role name.
+const isClause = (t) => /^[A-Z][a-z]{2,}\s+(?![A-Z][a-z])\S/.test(t) && t.split(/\s+/).length >= 3;
+function splitDashes(text) {
+  const parts = [];
+  let start = 0;
+  for (const m of text.matchAll(/\s[-–]\s/g)) { parts.push([start, m.index]); start = m.index + m[0].length; }
+  parts.push([start, text.length]);
+  if (parts.length < 2) return null;
+  const t = parts.map(([a, b]) => text.slice(a, b).trim());
+  if (!t.slice(1).every(isClause)) return null;
+  if (parts.length < 3 && !isClause(t[0])) return null;
+  return parts.map(([a, b]) => {
+    while (a < b && /\s/.test(text[a])) a++;
+    while (b > a && /[\s.;,]/.test(text[b - 1])) b--;
+    return [a, b];
+  });
+}
+
 function numberAndSplit(segs) {
   let n = 0;
   for (const s of segs) {
     if (s.kind !== 'seg') continue;
     s.id = String(++n);
-    const parts = s.tabular ? null : splitList(s.text, SKILLS_HEADING_RE.test(s.heading || ''));
+    let parts = s.tabular ? null : splitList(s.text, SKILLS_HEADING_RE.test(s.heading || ''));
+    if (!parts && !s.tabular && (parts = splitDashes(s.text))) s.dashSplit = true;
     if (parts) {
       s.children = parts.map(([a, b], k) => ({ id: `${s.id}.${k + 1}`, text: s.text.slice(a, b), range: [a, b] }));
     }
   }
   return segs;
 }
+
+// A table's header row ("Role | Employer | From | To", "Skill | Level"): every cell is
+// a column name. It's kept as a header, never as a line that can become evidence.
+const TABLE_HEAD_RE = /^(?:job\s+)?(?:role|title|job|position|employer|company|organi[sz]ation|client|from|to|start|end|dates?|period|years?|duration|location|skills?|level|proficiency|tools?|technology|experience|qualification|degree|institution|university|school|course|grade|subject|certification|issuer|awarded|description)$/i;
+export const isTableHead = (cells) => cells.length >= 2 && cells.every((c) => TABLE_HEAD_RE.test(c.trim()));
 
 // ---------- PDF ----------
 
@@ -170,7 +198,10 @@ function xAt(pieces, idx) {
   return last.it.x + last.it.w;
 }
 
-function finishLine(l) {
+// cols: x where each column of a table starts (from its header row), or null.
+const colOf = (cols, x, size) => { let k = 0; while (k + 1 < cols.length && cols[k + 1] <= x + 0.5 * size) k++; return k; };
+
+function finishLine(l, cols = null) {
   l.items.sort((a, b) => a.x - b.x);
   let text = '', prev = null;
   const pieces = [];
@@ -179,7 +210,7 @@ function finishLine(l) {
     if (prev) {
       if (it.str === prev.str && Math.abs(it.x - prev.x) < 1) continue; // overprinted duplicate
       const gap = it.x - (prev.x + prev.w);
-      if (gap > 2 * l.size) { l.tabular = true; text += ' | '; }
+      if (gap > 2 * l.size || (cols && colOf(cols, it.x, l.size) !== colOf(cols, prev.x, l.size))) { l.tabular = true; text += ' | '; }
       else if (gap > 0.12 * l.size) text += ' ';
     }
     pieces.push({ it, start: text.length, off: 0, len: it.str.length });
@@ -250,6 +281,44 @@ function boxesFor(pieces, a, b) {
   return rects;
 }
 
+// Cells of a PDF line: items split at gaps wider than a short space.
+function lineCells(l) {
+  const cells = [];
+  let prev = null;
+  for (const it of l.items) {
+    if (prev && it.x - (prev.x + prev.w) <= 0.6 * l.size) { const c = cells[cells.length - 1]; c.text += ' ' + it.str; }
+    else cells.push({ x: it.x, text: it.str });
+    prev = it;
+  }
+  return cells;
+}
+
+// Table header rows fix the column starts; the rows under them are re-joined with
+// " | " between columns even where the gap is narrow ("Senior BI Analyst Brightmart
+// Retail" -> "Senior BI Analyst | Brightmart Retail"). The table ends at the first
+// line that doesn't sit in at least two columns or has text running across one.
+function markTables(all) {
+  for (let i = 0; i < all.length; i++) {
+    const h = all[i];
+    if (h.bullet) continue;
+    const cells = lineCells(h);
+    if (!isTableHead(cells.map((c) => c.text))) continue;
+    const cols = cells.map((c) => c.x);
+    h.tableHead = true;
+    finishLine(h, cols);
+    for (let j = i + 1; j < all.length; j++) {
+      const l = all[j];
+      if (l.page !== h.page || l.col !== h.col || l.bullet) break;
+      const tol = 0.5 * l.size;
+      if (l.items[0].x < cols[0] - l.size) break;
+      if (l.items.some((it) => cols.some((c) => it.x < c - tol && it.x + it.w > c + tol))) break;
+      if (new Set(l.items.map((it) => colOf(cols, it.x, l.size))).size < 2) break;
+      finishLine(l, cols);
+      i = j;
+    }
+  }
+}
+
 // pages: [{ width, height, items }] where items are pdf.js getTextContent() items.
 export function segmentPdf(pages) {
   const all = [];
@@ -266,6 +335,7 @@ export function segmentPdf(pages) {
     all.push(...lines);
   });
   if (!all.length) return [];
+  markTables(all);
 
   // Body font size (by characters) and tightest line pitch per font size.
   const sizeChars = new Map();
@@ -302,6 +372,7 @@ export function segmentPdf(pages) {
   let cur = null, heading = null;
   for (const l of all) {
     if (!l.pieces.length) continue;
+    if (l.tableHead) { cur = null; segs.push({ kind: 'heading', table: true, text: l.text }); continue; }
     if (isHeading(l)) {
       cur = null;
       heading = l.text;
@@ -353,6 +424,11 @@ export function segmentText(raw) {
     }
     const tableRow = /^\|.*\|$/.test(t);
     const text = tableRow ? t.replace(/^\|\s*|\s*\|$/g, '') : bm ? t.slice(bm[0].length) : t;
+    if (tableRow && isTableHead(text.split('|'))) {
+      segs.push({ kind: 'heading', table: true, text: text.split('|').map((c) => c.trim()).join(' | ') });
+      cur = null; prevLong = false;
+      continue;
+    }
     const indented = /^\s/.test(line);
     if (cur && !bm && !tableRow && !cur.tabular && (prevLong || (indented && cur.bullet))) {
       cur.text += (/[A-Za-z]-$/.test(cur.text) ? '' : ' ') + text;

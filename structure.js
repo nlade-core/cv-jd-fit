@@ -100,6 +100,7 @@ export function structureCv(segs) {
     if (s.kind === 'seg' && !s.bullet && !s.children && PLAIN_HEADING_RE.test(s.text.trim())) {
       s.kind = 'heading';
     }
+    if (s.kind === 'heading' && s.table) { s.section = section; s.sub = true; continue; } // a table's header row
     if (s.kind === 'heading') {
       const sec = sectionOf(s.text);
       if (sec) {
@@ -128,9 +129,12 @@ export function structureCv(segs) {
       const r = findDateRange(s.text);
       if (r) {
         const before = cleanTitle(s.text.slice(0, r.index));
-        const title = before.length >= 3 ? before : pendingTitle?.title;
+        // A table row: first cell is the title, second the employer.
+        const cells = s.tabular ? before.split(/\s+\|\s+/).map(cleanTitle).filter(Boolean) : [];
+        const title = cells.length >= 2 ? cells[0] : before.length >= 3 ? before : pendingTitle?.title;
         if (title) {
           role = newRole(title, r, s.id);
+          if (cells.length >= 2) role.employer = cells[1];
           roles.push(role);
           if (before.length < 3 && pendingTitle?.seg) { pendingTitle.seg.role = role; pendingTitle.seg.roleLine = true; role.headerIds.unshift(pendingTitle.seg.id); }
           s.roleLine = true;
@@ -146,9 +150,19 @@ export function structureCv(segs) {
     } else if (s.bullet) pendingTitle = null;
 
     if (section === 'experience' && role) s.role = role;
+    if (s.dashSplit && s.role) dropRolePrefix(s);
   }
   labelSegs(segs);
   return { segs, roles };
+}
+
+// "Senior BI Analyst - Own… - Built…": the leading clause just names the role, so it
+// isn't a line of evidence; the remaining clauses are renumbered.
+function dropRolePrefix(s) {
+  const p = s.children[0].text.toLowerCase(), t = s.role.title.toLowerCase();
+  if (!(p === t || p === s.role.short.toLowerCase() || (p.split(/\s+/).length >= 2 && t.startsWith(p)))) return;
+  s.children.shift();
+  s.children.forEach((c, k) => (c.id = `${s.id}.${k + 1}`));
 }
 
 // Labels and flat fields from each segment's current section and role. Run after
@@ -183,6 +197,8 @@ export function labelSegs(segs) {
   return segs;
 }
 
+export const roleName = (r) => (r.employer ? `${r.title}, ${r.employer}` : r.title);
+
 const NOT_WORK_RE = /career break|sabbatical|parental leave|maternity|paternity|caring responsibilit|travell?ing/i;
 
 function newRole(title, r, segId) {
@@ -211,6 +227,8 @@ function findRole(roles, text) {
     return t === title || t === short || (t.length >= 6 && t.length <= 60 && title.includes(t));
   });
   if (exact) return exact;
+  const byEmployer = roles.filter((r) => r.employer && r.employer.toLowerCase() === t);
+  if (byEmployer.length === 1) return byEmployer[0]; // the employer alone, when only one role has it
   let best = null, bestLen = 0;
   for (const r of roles) {
     const words = r.title.toLowerCase().split(/\s+/);
@@ -252,7 +270,7 @@ export function compactView(segs, sections) {
   for (const s of segs) {
     if (s.kind !== 'seg' || !want.has(s.section)) continue;
     if (s.section !== lastSec) { out.push(`## ${SECTION_NAMES[s.section]}`); lastSec = s.section; lastRole = null; }
-    if (s.role && s.role !== lastRole) { out.push(`### ${s.role.title} (${dateSpan(s.role.dates)})`); lastRole = s.role; }
+    if (s.role && s.role !== lastRole) { out.push(`### ${roleName(s.role)} (${dateSpan(s.role.dates)})`); lastRole = s.role; }
     if (s.children) out.push(s.children.map((c) => `[${c.id}] ${c.text}`).join('; '));
     else out.push(`[${s.id}] ${s.text}`);
   }
