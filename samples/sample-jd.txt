@@ -1,0 +1,25 @@
+Senior Data Scientist (sample job description, made up)
+
+About us
+We are a sports-tech company building the future of performance.
+
+What you'll do
+- Build models that help coaches pick teams
+- Own pipelines end to end
+
+Essential
+- 5+ years of experience in data science
+- Strong Python and SQL
+- Experience with AWS or another cloud platform
+- Degree in a quantitative subject such as Mathematics or Statistics
+
+Desirable
+- Airflow or similar orchestration
+- Mentoring junior data scientists
+- Sports or health data experience
+
+Benefits
+- 30 days holiday
+- Private healthcare
+
+We are an equal opportunity employer and welcome applications regardless of background.

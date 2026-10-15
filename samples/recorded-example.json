@@ -1,0 +1,862 @@
+{
+ "format": "cv-jd-fit",
+ "version": 1,
+ "mode": "hiring",
+ "createdAt": "2026-10-15T14:28:47.546Z",
+ "exportedAt": "2026-10-15T14:28:47.546Z",
+ "app": {
+  "page": "headless local run"
+ },
+ "model": {
+  "state": "stub",
+  "note": "keyword-rule stand-in, not the on-device model"
+ },
+ "pdfsIncluded": false,
+ "cvs": [
+  {
+   "name": "sample-cv.pdf",
+   "kind": "pdf",
+   "file": null,
+   "text": null,
+   "pageCount": 1,
+   "warnings": [],
+   "parseConfirmed": false,
+   "parseFixes": 0,
+   "roles": [
+    {
+     "title": "Senior BI Analyst Brightmart Retail",
+     "short": "Senior BI Analyst Brightmart Retail",
+     "dates": [
+      "2023-05",
+      "present"
+     ],
+     "headerIds": [
+      "3"
+     ],
+     "counted": true
+    },
+    {
+     "title": "Reporting Analyst Brightmart Retail",
+     "short": "Reporting Analyst Brightmart Retail",
+     "dates": [
+      "2022-01",
+      "2023-04"
+     ],
+     "headerIds": [
+      "4"
+     ],
+     "counted": true
+    },
+    {
+     "title": "Store Manager | Brightmart Retail",
+     "short": "Store Manager",
+     "dates": [
+      "2016-09",
+      "2021-12"
+     ],
+     "headerIds": [
+      "5"
+     ],
+     "counted": true
+    }
+   ],
+   "segs": [
+    {
+     "kind": "heading",
+     "text": "Hannah Okafor",
+     "section": "profile",
+     "sub": true
+    },
+    {
+     "kind": "seg",
+     "id": "1",
+     "text": "Nottingham | hannah.okafor@example.com",
+     "heading": "Hannah Okafor",
+     "bullet": false,
+     "tabular": false,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 88.1399963275,
+       "w": 202.49413134774406,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "profile",
+     "dates": null,
+     "label": "Profile › line 1",
+     "role": null
+    },
+    {
+     "kind": "heading",
+     "text": "CAREER",
+     "section": "experience"
+    },
+    {
+     "kind": "seg",
+     "id": "2",
+     "text": "Role | Employer | From | To",
+     "heading": "CAREER",
+     "bullet": false,
+     "tabular": true,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 139.88999417124995,
+       "w": 22.75341694194092,
+       "h": 10.919999544999996
+      },
+      {
+       "page": 1,
+       "x": 145.3124939453125,
+       "y": 139.88999417124995,
+       "w": 47.84985145625609,
+       "h": 10.919999544999996
+      },
+      {
+       "page": 1,
+       "x": 235.51171268701154,
+       "y": 139.88999417124995,
+       "w": 26.249998906250028,
+       "h": 10.919999544999996
+      },
+      {
+       "page": 1,
+       "x": 286.0546755810547,
+       "y": 139.88999417124995,
+       "w": 12.053466292772214,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "experience",
+     "dates": null,
+     "label": "Experience › line 1",
+     "role": null
+    },
+    {
+     "kind": "seg",
+     "id": "3",
+     "text": "Senior BI Analyst Brightmart Retail 2023-05 present",
+     "heading": "CAREER",
+     "bullet": false,
+     "tabular": false,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 157.88999342124993,
+       "w": 270.07689284679566,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "experience",
+     "dates": [
+      "2023-05",
+      "present"
+     ],
+     "label": "Experience › Senior BI Analyst Brightmart Retail (2023–present) › role line",
+     "roleLine": true,
+     "role": 0
+    },
+    {
+     "kind": "seg",
+     "id": "4",
+     "text": "Reporting Analyst Brightmart Retail 2022-01 2023-04",
+     "heading": "CAREER",
+     "bullet": false,
+     "tabular": false,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 175.88999267125,
+       "w": 273.5888555254639,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "experience",
+     "dates": [
+      "2022-01",
+      "2023-04"
+     ],
+     "label": "Experience › Reporting Analyst Brightmart Retail (2022–2023) › role line",
+     "roleLine": true,
+     "role": 1
+    },
+    {
+     "kind": "seg",
+     "id": "5",
+     "text": "Store Manager | Brightmart Retail 2016-09 2021-12",
+     "heading": "CAREER",
+     "bullet": false,
+     "tabular": true,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 193.88999192125,
+       "w": 69.45483073604862,
+       "h": 10.919999544999996
+      },
+      {
+       "page": 1,
+       "x": 145.3124939453125,
+       "y": 193.88999192125,
+       "w": 179.2763594551514,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "experience",
+     "dates": [
+      "2016-09",
+      "2021-12"
+     ],
+     "label": "Experience › Store Manager (2016–2021) › role line",
+     "roleLine": true,
+     "role": 2
+    },
+    {
+     "kind": "seg",
+     "id": "6",
+     "text": "Senior BI Analyst - Own the weekly trading dashboard in Power BI, used by 60 regional managers - Built and maintain the Azure Data Factory pipelines that load till and stock data into Azure Synapse every night",
+     "heading": "CAREER",
+     "bullet": false,
+     "tabular": false,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 214.13999107749993,
+       "w": 491.0199973658321,
+       "h": 10.919999544999996
+      },
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 228.38999048374995,
+       "w": 489.7162900601533,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "experience",
+     "dates": [
+      "2016-09",
+      "2021-12"
+     ],
+     "label": "Experience › Store Manager (2016–2021) › line 1",
+     "role": 2
+    },
+    {
+     "kind": "seg",
+     "id": "7",
+     "text": "Led the weekly KPI review with regional managers",
+     "heading": "CAREER",
+     "bullet": true,
+     "tabular": false,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 57.41381594303419,
+       "y": 242.63998988999998,
+       "w": 234.6196182489054,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "experience",
+     "dates": [
+      "2016-09",
+      "2021-12"
+     ],
+     "label": "Experience › Store Manager (2016–2021) › bullet 2",
+     "role": 2
+    },
+    {
+     "kind": "seg",
+     "id": "8",
+     "text": "Reporting Analyst - Wrote SQL reports on stock loss and staffing",
+     "heading": "CAREER",
+     "bullet": false,
+     "tabular": false,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 259.88998917124997,
+       "w": 307.1528184569653,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "experience",
+     "dates": [
+      "2016-09",
+      "2021-12"
+     ],
+     "label": "Experience › Store Manager (2016–2021) › line 3",
+     "role": 2
+    },
+    {
+     "kind": "seg",
+     "id": "9",
+     "text": "Store Manager - Managed a store team of 25 and a £6m annual turnover",
+     "heading": "CAREER",
+     "bullet": false,
+     "tabular": false,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 277.13998845249995,
+       "w": 342.02049203914527,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "experience",
+     "dates": [
+      "2016-09",
+      "2021-12"
+     ],
+     "label": "Experience › Store Manager (2016–2021) › line 4",
+     "role": 2
+    },
+    {
+     "kind": "heading",
+     "text": "SKILLS",
+     "section": "skills"
+    },
+    {
+     "kind": "seg",
+     "id": "10",
+     "text": "Skill | Level",
+     "heading": "SKILLS",
+     "bullet": false,
+     "tabular": true,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 328.88998629624996,
+       "w": 21.594725610219733,
+       "h": 10.919999544999996
+      },
+      {
+       "page": 1,
+       "x": 105.60937059960938,
+       "y": 328.88998629624996,
+       "w": 26.849852226256104,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "skills",
+     "dates": null,
+     "label": "Skills › line 1",
+     "role": null
+    },
+    {
+     "kind": "seg",
+     "id": "11",
+     "text": "SQL | Advanced",
+     "heading": "SKILLS",
+     "bullet": false,
+     "tabular": true,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 346.88998554624993,
+       "w": 21.010253004572753,
+       "h": 10.919999544999996
+      },
+      {
+       "page": 1,
+       "x": 105.60937059960938,
+       "y": 346.88998554624993,
+       "w": 46.70141389910768,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "skills",
+     "dates": null,
+     "label": "Skills › line 2",
+     "role": null
+    },
+    {
+     "kind": "seg",
+     "id": "12",
+     "text": "Power BI Advanced",
+     "heading": "SKILLS",
+     "bullet": false,
+     "tabular": false,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 364.88998479624996,
+       "w": 101.31078662371706,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "skills",
+     "dates": null,
+     "label": "Skills › line 3",
+     "role": null
+    },
+    {
+     "kind": "seg",
+     "id": "13",
+     "text": "Excel | Advanced",
+     "heading": "SKILLS",
+     "bullet": false,
+     "tabular": true,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 382.88998404624994,
+       "w": 25.675780180175785,
+       "h": 10.919999544999996
+      },
+      {
+       "page": 1,
+       "x": 105.60937059960938,
+       "y": 382.88998404624994,
+       "w": 46.70141389910768,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "skills",
+     "dates": null,
+     "label": "Skills › line 4",
+     "role": null
+    },
+    {
+     "kind": "seg",
+     "id": "14",
+     "text": "Python | Basic (online course)",
+     "heading": "SKILLS",
+     "bullet": false,
+     "tabular": true,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 401.63998326499996,
+       "w": 32.68945165793945,
+       "h": 10.919999544999996
+      },
+      {
+       "page": 1,
+       "x": 105.60937059960938,
+       "y": 401.63998326499996,
+       "w": 98.04272016988651,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "skills",
+     "dates": null,
+     "label": "Skills › line 5",
+     "role": null
+    },
+    {
+     "kind": "heading",
+     "text": "EDUCATION",
+     "section": "education"
+    },
+    {
+     "kind": "seg",
+     "id": "15",
+     "text": "BA (Hons) Business Management, Nottingham Trent University, 2016",
+     "heading": "EDUCATION",
+     "bullet": false,
+     "tabular": false,
+     "page": 1,
+     "boxes": [
+      {
+       "page": 1,
+       "x": 50.999997875,
+       "y": 453.38998110874996,
+       "w": 321.39329364361214,
+       "h": 10.919999544999996
+      }
+     ],
+     "section": "education",
+     "dates": null,
+     "label": "Education › line 1",
+     "role": null
+    }
+   ]
+  }
+ ],
+ "files": {},
+ "hiring": {
+  "jd": {
+   "text": "Senior Data Scientist (sample job description, made up)\n\nAbout us\nWe are a sports-tech company building the future of performance.\n\nWhat you'll do\n- Build models that help coaches pick teams\n- Own pipelines end to end\n\nEssential\n- 5+ years of experience in data science\n- Strong Python and SQL\n- Experience with AWS or another cloud platform\n- Degree in a quantitative subject such as Mathematics or Statistics\n\nDesirable\n- Airflow or similar orchestration\n- Mentoring junior data scientists\n- Sports or health data experience\n\nBenefits\n- 30 days holiday\n- Private healthcare\n\nWe are an equal opportunity employer and welcome applications regardless of background.\n",
+   "criteria": [
+    {
+     "text": "5+ years of experience in data science",
+     "type": "years",
+     "importance": "required"
+    },
+    {
+     "text": "Python and SQL",
+     "type": "skill",
+     "importance": "required"
+    },
+    {
+     "text": "AWS or another cloud platform",
+     "type": "skill",
+     "importance": "required"
+    },
+    {
+     "text": "Degree in a quantitative subject such as Mathematics or Statistics",
+     "type": "degree",
+     "importance": "required"
+    },
+    {
+     "text": "Airflow or similar orchestration",
+     "type": "skill",
+     "importance": "preferred"
+    },
+    {
+     "text": "Mentoring junior data scientists",
+     "type": "leadership",
+     "importance": "preferred"
+    },
+    {
+     "text": "Sports or health data experience",
+     "type": "domain",
+     "importance": "preferred"
+    }
+   ],
+   "state": "confirmed"
+  },
+  "cv": 0,
+  "single": {
+   "cv": 0,
+   "criteria": [
+    {
+     "text": "5+ years of experience in data science",
+     "type": "years",
+     "importance": "required"
+    },
+    {
+     "text": "Python and SQL",
+     "type": "skill",
+     "importance": "required"
+    },
+    {
+     "text": "AWS or another cloud platform",
+     "type": "skill",
+     "importance": "required"
+    },
+    {
+     "text": "Degree in a quantitative subject such as Mathematics or Statistics",
+     "type": "degree",
+     "importance": "required"
+    },
+    {
+     "text": "Airflow or similar orchestration",
+     "type": "skill",
+     "importance": "preferred"
+    },
+    {
+     "text": "Mentoring junior data scientists",
+     "type": "leadership",
+     "importance": "preferred"
+    },
+    {
+     "text": "Sports or health data experience",
+     "type": "domain",
+     "importance": "preferred"
+    }
+   ],
+   "results": [
+    {
+     "state": "done",
+     "years": {
+      "need": 5,
+      "months": 122,
+      "status": "met",
+      "roles": [
+       {
+        "title": "Senior BI Analyst Brightmart Retail",
+        "span": "2023–present",
+        "dates": [
+         "2023-05",
+         "present"
+        ],
+        "months": 42,
+        "counted": true,
+        "ids": [
+         "3"
+        ]
+       },
+       {
+        "title": "Reporting Analyst Brightmart Retail",
+        "span": "2022–2023",
+        "dates": [
+         "2022-01",
+         "2023-04"
+        ],
+        "months": 16,
+        "counted": true,
+        "ids": [
+         "4"
+        ]
+       },
+       {
+        "title": "Store Manager | Brightmart Retail",
+        "span": "2016–2021",
+        "dates": [
+         "2016-09",
+         "2021-12"
+        ],
+        "months": 64,
+        "counted": true,
+        "ids": [
+         "5"
+        ]
+       }
+      ]
+     },
+     "evidence": [
+      {
+       "id": "3",
+       "kind": "direct",
+       "by": "code"
+      },
+      {
+       "id": "4",
+       "kind": "direct",
+       "by": "code"
+      },
+      {
+       "id": "5",
+       "kind": "direct",
+       "by": "code"
+      }
+     ],
+     "routed": {
+      "sections": [
+       "experience"
+      ],
+      "ids": [],
+      "model": false
+     },
+     "override": null
+    },
+    {
+     "state": "done",
+     "evidence": [
+      {
+       "id": "14",
+       "kind": "direct",
+       "by": "model"
+      }
+     ],
+     "routed": {
+      "sections": [
+       "skills",
+       "experience",
+       "profile"
+      ],
+      "ids": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5",
+       "6",
+       "7",
+       "8",
+       "9",
+       "10",
+       "11",
+       "12",
+       "13",
+       "14"
+      ],
+      "fallback": false,
+      "model": true
+     },
+     "override": null
+    },
+    {
+     "state": "done",
+     "evidence": [
+      {
+       "id": "6",
+       "kind": "indirect",
+       "by": "model"
+      }
+     ],
+     "routed": {
+      "sections": [
+       "skills",
+       "experience",
+       "profile"
+      ],
+      "ids": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5",
+       "6",
+       "7",
+       "8",
+       "9",
+       "10",
+       "11",
+       "12",
+       "13",
+       "14"
+      ],
+      "fallback": false,
+      "model": true
+     },
+     "override": null
+    },
+    {
+     "state": "done",
+     "evidence": [
+      {
+       "id": "15",
+       "kind": "indirect",
+       "by": "model"
+      }
+     ],
+     "routed": {
+      "sections": [
+       "education"
+      ],
+      "ids": [
+       "15"
+      ],
+      "fallback": false,
+      "model": true
+     },
+     "override": null
+    },
+    {
+     "state": "done",
+     "evidence": [],
+     "routed": {
+      "sections": [
+       "skills",
+       "experience",
+       "profile"
+      ],
+      "ids": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5",
+       "6",
+       "7",
+       "8",
+       "9",
+       "10",
+       "11",
+       "12",
+       "13",
+       "14"
+      ],
+      "fallback": false,
+      "model": true
+     },
+     "override": null
+    },
+    {
+     "state": "done",
+     "evidence": [
+      {
+       "id": "7",
+       "kind": "indirect",
+       "by": "model"
+      },
+      {
+       "id": "9",
+       "kind": "indirect",
+       "by": "model"
+      }
+     ],
+     "routed": {
+      "sections": [
+       "experience",
+       "profile"
+      ],
+      "ids": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5",
+       "6",
+       "7",
+       "8",
+       "9"
+      ],
+      "fallback": false,
+      "model": true
+     },
+     "override": null
+    },
+    {
+     "state": "done",
+     "evidence": [],
+     "routed": {
+      "sections": [
+       "experience",
+       "profile"
+      ],
+      "ids": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5",
+       "6",
+       "7",
+       "8",
+       "9"
+      ],
+      "fallback": false,
+      "model": true
+     },
+     "override": null
+    }
+   ],
+   "timing": {
+    "firstMs": 2,
+    "totalMs": 1520
+   },
+   "stopped": false,
+   "failed": false
+  },
+  "batch": null,
+  "shown": "single"
+ },
+ "recording": {
+  "note": "Recorded example. Produced by running this page's own pipeline headless with a keyword-rule test stand-in in place of the on-device model. It is NOT on-device model output.",
+  "cv": "samples/sample-cv.pdf (synthetic CV, generated from cv-evidence-bench syn03_partial_table.md)",
+  "jd": "samples/sample-jd.txt (made up)",
+  "generatedAt": "2026-10-15T14:28:47.547Z"
+ }
+}

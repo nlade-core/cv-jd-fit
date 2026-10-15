@@ -7,25 +7,55 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-mode="splash">
   <header>
-    <h1>cv-jd-fit</h1>
-    <p class="tagline">Paste a job description, add a CV, see the evidence for each requirement — entirely in your browser.</p>
+    <div class="title-row">
+      <h1><button type="button" id="go-home" class="home-btn" title="Back to the start page">cv-jd-fit</button></h1>
+      <nav class="mode-nav" aria-label="Mode">
+        <span id="mode-label" class="mode-label"></span>
+        <button type="button" id="switch-mode" class="link-btn" hidden></button>
+      </nav>
+    </div>
+    <p class="tagline" id="tagline">Check a CV against a job description, requirement by requirement, entirely in your browser.</p>
     <div class="header-row">
       <span id="status-pill" class="status-pill">checking model…</span>
       <span id="net-counter" class="net-counter" title="Counts every request this page makes to any other website, live. The on-device model download is handled by the browser itself, not by this page.">
         <span class="net-dot" aria-hidden="true"></span><span id="net-text">0 bytes sent</span>
       </span>
     </div>
+    <p id="model-note" class="note" aria-live="polite"></p>
   </header>
 
-  <section id="explainer" class="explainer" hidden aria-labelledby="explainer-title">
-    <div class="dl-row">
-      <h2 id="explainer-title">Getting the on-device model ready</h2>
-      <span id="dl-text" class="dl-text" aria-live="polite">Starting download…</span>
+  <section id="splash" class="splash" data-views="splash" aria-labelledby="splash-title">
+    <h2 id="splash-title">What are you doing today?</h2>
+    <div class="choices">
+      <button type="button" class="choice" data-choose="hiring">
+        <strong>I'm hiring</strong>
+        <span>Start from a job description, then check one CV or a whole folder of them.</span>
+      </button>
+      <button type="button" class="choice" data-choose="seeker">
+        <strong>I'm job hunting</strong>
+        <span>Start from your CV, then see how it reads against one or more job descriptions.</span>
+      </button>
     </div>
-    <progress id="dl-progress" max="1" value="0" aria-label="Model download"></progress>
-    <p id="dl-activate" class="dl-activate" hidden>Click anywhere or press a key to start the one-time download.</p>
+    <div class="splash-more">
+      <button type="button" id="see-example" class="secondary-btn">See an example</button>
+      <span class="hint">A recorded result, replayed. Instant, and it doesn't need the model.</span>
+    </div>
+    <div class="splash-more">
+      <label class="file-btn secondary"><input type="file" id="splash-import" accept=".json,application/json">Open a project file</label>
+      <span class="hint">Pick up where you left off.</span>
+    </div>
+    <p id="splash-msg" class="note" role="status"></p>
+  </section>
+
+  <section id="explainer" class="explainer" aria-labelledby="explainer-title">
+    <div class="dl-row">
+      <h2 id="explainer-title">How it works</h2>
+      <span id="dl-text" class="dl-text" aria-live="polite"></span>
+    </div>
+    <progress id="dl-progress" max="1" value="0" aria-label="Model download" hidden></progress>
+    <p id="dl-activate" class="dl-activate" hidden>Pick one of the options above (or click anywhere) to start the one-time download.</p>
     <ol class="steps">
       <li style="--i:0">
         <svg viewBox="0 0 48 48" aria-hidden="true"><path class="ln" d="M12 6h17l8 8v28H12z"/><path class="ln" d="M29 6v8h8"/><path class="fill-line" d="M17 22h14M17 28h14M17 34h9"/></svg>
@@ -33,7 +63,7 @@
       </li>
       <li style="--i:1">
         <svg viewBox="0 0 48 48" aria-hidden="true"><path class="ln" d="M8 10h32v28H8z"/><path class="fill-line" d="M14 18h4M22 18h12M14 25h4M22 25h12M14 32h4M22 32h8"/></svg>
-        <strong>Find the requirements</strong><span>The job ad becomes a short checklist you confirm.</span>
+        <strong>Find the requirements</strong><span>The job ad becomes a short checklist you can check.</span>
       </li>
       <li style="--i:2">
         <svg viewBox="0 0 48 48" aria-hidden="true"><circle class="ln" cx="21" cy="21" r="11"/><path class="ln" d="M29 29l11 11"/><path class="fill-line" d="M16 21h10"/></svg>
@@ -44,12 +74,24 @@
         <strong>You decide</strong><span>Check, add or remove evidence and override any status.</span>
       </li>
     </ol>
-    <p class="lock">Nothing you add is sent anywhere. The model runs on this device; this one-time download comes from your browser, not from this page.</p>
+    <p class="lock">Nothing you add is sent anywhere. The model runs on this device; its one-time download comes from your browser, not from this page.</p>
   </section>
 
   <main>
-    <section class="panel" id="cv-panel">
-      <h2>CV <span class="hint">(pasted text is saved to this browser only)</span></h2>
+    <!-- hiring -->
+    <section class="panel" id="jd-panel" data-views="hiring">
+      <h2>1. Job description</h2>
+      <div class="cv-source">
+        <label class="file-btn secondary"><input type="file" id="jd-file" accept=".txt,.md,.pdf,text/plain,text/markdown,application/pdf">Upload a file</label>
+        <span class="cv-file-status">or paste it below</span>
+      </div>
+      <textarea id="jd-input" placeholder="Paste a job description here…" rows="8" aria-label="Job description"></textarea>
+      <div id="criteria-box" hidden></div>
+      <p id="note" class="note" aria-live="polite"></p>
+    </section>
+
+    <section class="panel" id="cv-panel" data-views="hiring">
+      <h2>2. CV <span class="hint">(pasted text is saved to this browser only)</span></h2>
       <div class="cv-source">
         <label class="file-btn"><input type="file" id="cv-file" accept="application/pdf,.pdf">Upload PDF</label>
         <button type="button" id="cv-file-clear" class="link-btn" hidden>Use pasted text instead</button>
@@ -59,42 +101,93 @@
       <textarea id="cv-text" rows="14" aria-label="CV text"></textarea>
     </section>
 
-    <section class="panel" id="jd-panel">
-      <h2>Job description</h2>
-      <textarea id="jd-input" placeholder="Paste a job description here…" rows="8" aria-label="Job description"></textarea>
-      <div id="criteria-box" class="criteria-box" hidden>
-        <h3>Criteria <span id="criteria-state" class="crit-state"></span></h3>
-        <p id="criteria-source" class="hint"></p>
-        <ul id="criteria-list" class="criteria-list"></ul>
-        <div class="criteria-actions">
-          <button type="button" id="crit-add" class="link-btn">+ Add criterion</button>
-          <button type="button" id="crit-confirm" class="primary-btn">Confirm criteria</button>
-        </div>
+    <!-- job hunting -->
+    <section class="panel wide" id="seek-cv-panel" data-views="seeker">
+      <h2>1. Your CV</h2>
+      <div class="cv-source">
+        <label class="file-btn"><input type="file" id="seek-cv-file" accept="application/pdf,.pdf">Upload your CV (PDF)</label>
+        <span id="seek-cv-status" class="cv-file-status" aria-live="polite">It's read in this page and never leaves it.</span>
       </div>
-      <p id="note" class="note" aria-live="polite"></p>
+      <ul id="seek-cv-warnings" class="warnings" hidden></ul>
+      <details class="paste-alt">
+        <summary>Or paste the text instead</summary>
+        <textarea id="seek-cv-text" rows="10" aria-label="CV text"></textarea>
+        <button type="button" id="seek-cv-use" class="secondary-btn">Use this text</button>
+      </details>
     </section>
 
-    <section class="panel wide" id="result-panel" hidden>
+    <section class="panel wide" id="parse-panel" data-views="seeker" hidden>
+      <h2>2. Check how your CV was read</h2>
+      <p class="hint">Each line below is what the page read from your CV, grouped by section and, under Experience, by role with its dates. Matching and the years-of-experience count use exactly this, so fix anything that's wrong: change a line's section or role, or a role's title and dates.</p>
+      <p id="parse-summary" class="parse-summary"></p>
+      <div id="parse-list" class="parse-list"></div>
+      <div class="criteria-actions">
+        <span id="parse-state" class="pc-state" aria-live="polite"></span>
+        <button type="button" id="parse-confirm" class="primary-btn">This is right — continue</button>
+      </div>
+    </section>
+
+    <section class="panel wide" id="seek-jd-panel" data-views="seeker" hidden>
+      <h2>3. Job descriptions</h2>
+      <p class="hint">Add one or several. Criteria are read from each one and checked against your CV; reviewing them is optional.</p>
+      <textarea id="seek-jd-input" rows="6" placeholder="Paste a job description here…" aria-label="Job description to add"></textarea>
+      <div class="cv-source">
+        <button type="button" id="seek-jd-add" class="primary-btn">Add this job description</button>
+        <label class="file-btn secondary"><input type="file" id="seek-jd-files" multiple accept=".txt,.md,.pdf,text/plain,text/markdown,application/pdf">Pick files (.txt, .md, .pdf)</label>
+        <span id="seek-jd-note" class="cv-file-status" aria-live="polite"></span>
+      </div>
+      <ul id="seek-jd-list" class="jd-list"></ul>
+    </section>
+
+    <section class="panel wide" id="seek-table-panel" data-views="seeker" hidden>
+      <h2>Your CV against each job description</h2>
+      <p class="hint">Sorted by coverage (Met 1, Possible ½, Not found 0; required criteria count double). Click a row for the evidence.</p>
+      <div class="table-wrap">
+        <table id="seek-table" class="batch-table"><thead></thead><tbody></tbody></table>
+      </div>
+    </section>
+
+    <!-- recorded example -->
+    <section class="panel wide replay-panel" id="replay-panel" data-views="replay">
+      <p class="rec-label">Recorded example</p>
+      <h2>A replay of a stored result, not a live run</h2>
+      <p>Nothing is computed now and the on-device model isn't used. The job description and the CV are made up. The result was recorded by running this page's own pipeline with a keyword-based test stand-in in place of the on-device model, so it shows how the page works, not how well the model does.</p>
+      <p id="replay-status" class="note" aria-live="polite"></p>
+      <details>
+        <summary>The sample job description</summary>
+        <pre id="replay-jd" class="replay-jd"></pre>
+      </details>
+      <h3 class="sub-h">Criteria, as confirmed</h3>
+      <ul id="replay-criteria" class="replay-criteria"></ul>
+      <div class="cv-source">
+        <button type="button" id="replay-again" class="secondary-btn">Replay</button>
+        <button type="button" class="link-btn" data-choose="hiring">Try it: I'm hiring</button>
+        <button type="button" class="link-btn" data-choose="seeker">Try it: I'm job hunting</button>
+      </div>
+    </section>
+
+    <!-- shared result view -->
+    <section class="panel wide" id="result-panel" data-views="hiring seeker replay" hidden>
       <div class="result-layout">
         <div class="result-main">
           <h2 id="result-title">Result</h2>
           <p id="timer" class="timer" aria-live="off"></p>
           <div class="score-row">
             <div class="score" id="score-value">–</div>
-            <div class="score-label">/ 100</div>
+            <div class="score-label" id="score-label">/ 100</div>
           </div>
           <p class="score-note" id="score-note"></p>
-          <p class="list-hint">Open a criterion to see its evidence. While one is open, click a line on the CV to add it as evidence.</p>
+          <p class="list-hint" id="list-hint"></p>
           <ul id="crit-results" class="crit-results"></ul>
         </div>
         <div class="evidence">
-          <h3>The CV</h3>
+          <h3 id="doc-title">The CV</h3>
           <div id="evidence-view" class="evidence-view"></div>
         </div>
       </div>
     </section>
 
-    <section class="panel wide" id="batch-panel">
+    <section class="panel wide" id="batch-panel" data-views="hiring">
       <h2>Compare a folder of CVs</h2>
       <p class="hint">Checks every PDF against the confirmed criteria, one after another. Files are read in this page; nothing is written to the folder.</p>
       <div class="batch-actions">
@@ -115,10 +208,23 @@
         </table>
       </div>
     </section>
+
+    <section class="panel wide" id="project-panel" data-views="hiring seeker">
+      <h2>Save or open a project</h2>
+      <p class="hint">A project file holds what's on this page: the job description(s), the criteria, how each CV was read (with your fixes), the results, evidence and your overrides. <strong>It contains personal data.</strong> It's saved only where you choose to save it; nothing is uploaded.</p>
+      <div class="project-actions">
+        <button type="button" id="export-btn" class="primary-btn">Save project file</button>
+        <label class="check"><input type="checkbox" id="export-pdfs"> Include the original PDFs</label>
+        <span id="export-size" class="hint" aria-live="polite"></span>
+        <label class="file-btn secondary"><input type="file" id="import-file" accept=".json,application/json">Open a project file</label>
+      </div>
+      <p class="hint">Without the PDFs, an opened project shows the text that was read instead of the pages.</p>
+      <p id="project-msg" class="note" role="status"></p>
+    </section>
   </main>
 
   <footer>
-    <p>Runs entirely on your device via Chrome's built-in AI. The CV (pasted or PDF) and job description never leave this page — no server, no network request. The counter at the top counts any request to another site, live.</p>
+    <p>Runs entirely on your device via Chrome's built-in AI. CVs and job descriptions never leave this page — no server, no network request. The counter at the top counts any request to another site, live.</p>
   </footer>
 
   <div id="hl-tip" class="hl-tip" role="tooltip" hidden></div>

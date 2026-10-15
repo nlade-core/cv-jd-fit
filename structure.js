@@ -60,8 +60,20 @@ export function findDateRange(text) {
   return { start, end, index: m.index, length: m[0].length };
 }
 
+// A date typed by the user ("2019", "Mar 2021", "2021-03", "03/2021", "present") -> normalised, or null.
+const DATE_ONLY_RE = new RegExp(`^${END}$`, 'i');
+export function parseDate(s) {
+  s = String(s ?? '').trim();
+  return s && DATE_ONLY_RE.test(s) ? normDate(s) : null;
+}
+export const hasDates = (role) => !!(role?.dates?.[0] && role?.dates?.[1]);
+
 const yearOf = (d) => (d === 'present' ? 'present' : d.slice(0, 4));
-export const dateSpan = ([s, e]) => (yearOf(s) === yearOf(e) ? yearOf(s) : `${yearOf(s)}–${yearOf(e)}`);
+export const dateSpan = (dates) => {
+  const [s, e] = dates || [];
+  if (!s || !e) return 'no dates';
+  return yearOf(s) === yearOf(e) ? yearOf(s) : `${yearOf(s)}–${yearOf(e)}`;
+};
 
 // Month index (year*12 + month0). A bare year starts in January and ends in
 // December, so "2019–2022" counts as 48 months.
@@ -81,7 +93,6 @@ export function structureCv(segs) {
   let section = 'profile'; // anything before the first heading (name, contact, opening summary)
   let role = null, pendingTitle = null;
   const roles = [];
-  const counts = new Map(); // label counters per role / section
 
   for (const s of segs) {
     // A short plain line that is just a section name ("Experience") counts as a heading.
@@ -135,8 +146,14 @@ export function structureCv(segs) {
 
     if (section === 'experience' && role) s.role = role;
   }
+  labelSegs(segs);
+  return { segs, roles };
+}
 
-  // labels and flat fields, now that roles are known
+// Labels and flat fields from each segment's current section and role. Run after
+// structureCv() and again after every parse fix the user makes.
+export function labelSegs(segs) {
+  const counts = new Map(); // label counters per role / section
   for (const s of segs) {
     if (s.kind !== 'seg') continue;
     const sec = SECTION_NAMES[s.section];
@@ -162,13 +179,22 @@ export function structureCv(segs) {
       });
     }
   }
-  return { segs, roles };
+  return segs;
 }
 
 const NOT_WORK_RE = /career break|sabbatical|parental leave|maternity|paternity|caring responsibilit|travell?ing/i;
 
 function newRole(title, r, segId) {
-  return { title, short: shortTitle(title), dates: [r.start, r.end], headerIds: segId ? [segId] : [], counted: !NOT_WORK_RE.test(title) };
+  return makeRole(title, [r.start, r.end], segId);
+}
+export function makeRole(title, dates, segId) {
+  const t = cleanTitle(title) || 'Untitled role';
+  return { title: t, short: shortTitle(t), dates, headerIds: segId ? [segId] : [], counted: !NOT_WORK_RE.test(t) };
+}
+export function setRoleTitle(role, title) {
+  role.title = cleanTitle(title) || 'Untitled role';
+  role.short = shortTitle(role.title);
+  role.counted = !NOT_WORK_RE.test(role.title);
 }
 
 // A known role named again: by its title, by its company alone ("Lumen Retail Group"),
@@ -224,7 +250,7 @@ export function compactView(segs, sections) {
 // (except career breaks and similar, which are listed as not counted), and
 // overlapping ranges are merged so concurrent jobs aren't double-counted.
 export function computeYears(roles, now = new Date()) {
-  const spans = roles.map((r) => {
+  const spans = roles.filter(hasDates).map((r) => {
     const a = monthIndex(r.dates[0], false, now), b = monthIndex(r.dates[1], true, now);
     return { role: r, a, b: Math.max(a, b), months: Math.max(0, b - a + 1), counted: r.counted };
   });

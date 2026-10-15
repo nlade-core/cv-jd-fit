@@ -1,6 +1,6 @@
 # cv-jd-fit
 
-Paste a job description, add a CV (or a folder of them), and see the evidence for each requirement, entirely on-device via Chrome's built-in AI. Nothing you paste is ever sent to a server.
+Check a CV against a job description, requirement by requirement, entirely on-device via Chrome's built-in AI. For recruiters (one JD, one CV or a folder of them) and for job hunters (one CV, one or several JDs). Nothing you add is ever sent to a server.
 
 ## Why this exists
 
@@ -8,7 +8,15 @@ First validation step for an on-device CV↔JD matching tool: before building re
 
 **Result: yes.** Tested against two real, contrasting postings pulled live from Greenhouse and AI Dev Jobs — a backend/React/TypeScript role scored 78/100 against the sample CV's actual stack, a senior ML engineer role requiring production PyTorch/TensorFlow experience scored 30/100 against the same CV, which explicitly disclaims ML experience. The model correctly discriminated, and named the real, specific missing requirements in both cases rather than vague filler.
 
-## How v2 works
+## What v3 adds
+
+- **Start page.** "I'm hiring" or "I'm job hunting". The model check and session creation start on page load in the background; the click on a choice counts as the user gesture a first model download needs, so the download starts there. The download explainer lives on this page (and reappears in either mode while a download runs). The choice is remembered in this browser; the header links switch modes or go back to the start page.
+- **Recorded example** ("See an example"). Replays a stored result for a sample JD and a synthetic CV: the PDF renders, then criteria and highlights land one by one. Instant, no model needed, labelled "Recorded example" throughout, read-only. **How it was produced:** `samples/recorded-example.json` is a project file saved by running this page's own pipeline headless (PDF parsing, requirement lines, routing, years in code, status rules) with a keyword-rule test stand-in in place of the on-device model. **It is not on-device model output**; it shows how the page works, not how good the model is. The replay pacing is illustrative, not measured. The CV (`samples/sample-cv.pdf`) is generated from the synthetic `syn03_partial_table` CV of the cv-evidence-bench repo; the JD (`samples/sample-jd.txt`) is made up.
+- **Hiring** is the v2 flow, starting from the JD (paste or upload a .txt/.md/.pdf), then one CV or a folder batch.
+- **Job hunting** starts from the CV. A parse check shows every line grouped by section and role with dates; you can move a line to another section or role, start a new role from a line, and fix a role's title and dates (years of experience are recomputed from exactly this). Then add one or several JDs (paste each, or pick several files). Criteria are extracted per JD; reviewing them is optional. Each JD gets Met / Possible / Not found with the same evidence highlighting, worded factually for the job hunter ("This JD asks for X; your CV doesn't show it", "Evidence exists … but it's weak or buried"). With several JDs a table lists them sorted by coverage. No CV rewriting, no generated advice.
+- **Project files.** "Save project file" downloads one JSON file (`format: "cv-jd-fit", version: 1`) with the mode, JD(s) and criteria, parsed segments (with parse fixes), results, evidence, overrides, model availability and timestamps. The original PDFs are optional (base64, ticked by default when hiring; the resulting size is shown). Without them, an opened project shows the CV text instead of the pages. Opening restores everything, batch tables included; unknown formats and newer versions are refused with a message. The file contains personal data and lives only where you save it. This is also the fix for overrides being lost on reload.
+
+## How v2 works (still true)
 
 Lesson from a benchmark of a small on-device model on CV evidence: it gets much worse as prompts grow, it often answers a silent "no" with no evidence, and it is bad at met/partial/no verdicts. So prompts stay small, the model is asked only for evidence, and code decides everything else.
 
@@ -27,7 +35,9 @@ Lesson from a benchmark of a small on-device model on CV evidence: it gets much 
 
 PDFs are read in the page with [pdf.js](https://github.com/mozilla/pdf.js) **6.3.289** (`pdfjs-dist`, Apache-2.0), vendored in `vendor/pdfjs/` with its `LICENSE` and the standard fonts (Foxit/Liberation licences included). No CDN.
 
-**Not built:** OCR for scanned PDFs, Word files, writing results back to the folder, export/history.
+**Status (2026-10-15 15:34):** v3 shipped. Tested headless with the stubbed model (49/49 checks: start page in both modes, download on the choice click, remembered choice and switching, keyboard choice, the recorded example with no model present, hiring + batch + overrides, save/open round trip with and without PDFs, rejection of future/foreign/garbled files, job-hunting parse fixes, three JDs with the coverage table and wording, phone width light/dark, network counter at 0). **Still not run against the real on-device model** (it can't run headless), so speed and evidence quality remain unverified. Known parse limit visible in the recorded example: on table-layout CVs, a bullet block can land under the wrong role; the job-hunting parse check is where that gets fixed.
+
+**Not built:** OCR for scanned PDFs, Word files, writing results back to the folder, automatic saving of results between visits (use a project file).
 
 **Storage note:** all `nlade-core.github.io/*` projects share one browser origin, so `localStorage` is shared across them too. Keys here are namespaced under `cvjdfit.` to avoid collisions with sibling projects.
 

@@ -184,9 +184,9 @@ export function initBatch(deps) {
           cv = { name: file.name, kind: 'pdf', file, segs: [], roles: [], leaves: [], warnings: ['Could not read this PDF: ' + e.message] };
         }
         if (!cv.leaves.length && !cv.warnings.length) cv.warnings.push('No selectable text found.');
-        const cand = { cv, criteria, results: [], timing: { t0: performance.now(), tFirst: null, tEnd: null } };
+        const cand = { cv, criteria, results: [], timing: { t0: performance.now(), tFirst: null, tEnd: null }, frame: 'hiring' };
         const row = addRow(cand, k);
-        cand.onChange = () => { renderRow(row); if (sort !== 'none') applySort(); };
+        cand.onChange = () => { renderRow(row); if (sort !== 'none') applySort(); deps.onChange?.(); };
         if (!cv.leaves.length) {
           cand.failed = true;
           renderRow(row);
@@ -212,11 +212,43 @@ export function initBatch(deps) {
       tick();
       setEnabled();
       if (sort !== 'none') applySort();
+      deps.onChange?.();
     }
+  }
+
+  function reset() {
+    abort?.abort();
+    rows = [];
+    tbody.innerHTML = '';
+    table.hidden = true;
+    progressBox.hidden = true;
+    skippedEl.hidden = true;
+  }
+
+  // Rebuilds the table from a project file; candidates come in ready-made.
+  function restore(state) {
+    reset();
+    if (!state || !state.rows.length) return;
+    criteria = state.criteria;
+    sort = ['none', 'asc', 'desc'].includes(state.sort) ? state.sort : 'none';
+    buildHead();
+    table.hidden = false;
+    state.rows.forEach((cand, k) => {
+      const row = addRow(cand, k);
+      cand.onChange = () => { renderRow(row); if (sort !== 'none') applySort(); deps.onChange?.(); };
+    });
+    if (state.skipped) { skippedEl.hidden = false; skippedEl.textContent = state.skipped; }
+    progressBox.hidden = false;
+    bar.max = 1; bar.value = 1;
+    eta.textContent = `${state.rows.length} CV${state.rows.length === 1 ? '' : 's'} restored from a project file`;
+    applySort();
   }
 
   setEnabled();
   return {
-    setCriteriaReady(v) { ready = v; setEnabled(); }
+    setCriteriaReady(v) { ready = v; setEnabled(); },
+    get running() { return running; },
+    getState: () => (rows.length ? { criteria, rows: rows.slice().sort((a, b) => a.order - b.order).map((r) => r.cand), sort, skipped: skippedEl.hidden ? '' : skippedEl.textContent } : null),
+    restore, reset
   };
 }
