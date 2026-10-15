@@ -401,7 +401,8 @@ body[data-mode="splash"] main { display: none; }
 @media (max-width: 600px) {
   .pc-seg { grid-template-columns: 1fr; }
   .pc-ctl { justify-content: flex-start; }
-  .pc-ctl select { max-width: 100%; flex: 1 1 8rem; }
+  .pc-ctl select { max-width: 100%; flex: 0 1 auto; }
+  .pc-ctl .pc-role-sel { flex: 1 1 100%; } /* own row: role labels are long and were cut off */
 }
 .pc-state { font-size: 0.82rem; color: var(--muted); }
 .pc-state.ok { color: var(--good); }

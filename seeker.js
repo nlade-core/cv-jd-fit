@@ -155,7 +155,7 @@ export function initSeeker({ onChange, setLastShown }) {
     sel.setAttribute('aria-label', `Section for: ${s.text.slice(0, 60)}`);
     for (const k of SECTIONS) sel.append(new Option(SECTION_NAMES[k], k, false, k === s.section));
     sel.addEventListener('change', () => { fixSection(cv, s.id, sel.value); fixed(`sec-${s.id}`); });
-    const role = el('select');
+    const role = el('select', 'pc-role-sel');
     role.dataset.key = `role-${s.id}`;
     role.setAttribute('aria-label', `Role for: ${s.text.slice(0, 60)}`);
     role.append(new Option('no role', '', false, !s.role));
